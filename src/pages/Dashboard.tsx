@@ -7,6 +7,7 @@ import { UpcomingInterviews } from "@/components/dashboard/UpcomingInterviews";
 import { UpcomingDeadlines } from "@/components/dashboard/UpcomingDeadlines";
 import { RecentApplications } from "@/components/dashboard/RecentApplications";
 import { getGreetingNameHour } from "@/utils/format";
+import { Logo } from "@/components/ui/Logo";
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -74,6 +75,9 @@ export default function Dashboard() {
   return (
     <div data-ct-light className="space-y-4">
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4">
+          <Logo variant="dark" />
+        </div>
         <div className="text-xs text-slate-500">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}</div>
         <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
           {greeting}, {profile?.firstName ?? "Student"}.

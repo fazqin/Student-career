@@ -24,24 +24,37 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[rgb(var(--hero-bg))]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(20,184,166,0.22),transparent_55%),radial-gradient(circle_at_80%_10%,rgba(234,179,8,0.12),transparent_50%)]" />
-      <div className="noise pointer-events-none absolute inset-0" />
+  <div className="relative min-h-screen overflow-hidden bg-[rgb(var(--hero-bg))]">
+    {/* Efek Gradasi Latar Belakang */}
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(20,184,166,0.22),transparent_55%),radial-gradient(circle_at_80%_10%,rgba(234,179,8,0.12),transparent_50%)]" />
+    <div className="noise pointer-events-none absolute inset-0" />
 
-      <div className="mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6">
-        <div className="grid w-full gap-8 lg:grid-cols-12 lg:items-center">
-            <div data-ct-dark className="lg:col-span-6">
-              <Logo />
-              <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-white">
-                Welcome back.
-              </h1>
-              <p className="mt-4 max-w-md text-pretty text-base text-teal-100/70">
-                Log in to your career command center. This is a frontend-only demo; authentication is
-                mocked behind a REST-ready API layer.
-              </p>
-            </div>
+    {/* Container Utama */}
+    <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-4 sm:px-6">
+      
+      {/* 1. LOGO: Berada mandiri di pojok kiri atas */}
+      <div className="absolute left-4 top-8 sm:left-6 lg:left-8">
+        <Logo className="scale-110 origin-left transition-transform duration-200" />
+      </div>
 
-          <div className="lg:col-span-6 lg:flex lg:justify-end">
+      {/* 2. GRID UTAMA (Membagi Kiri & Kanan secara Seimbang) */}
+      <div className="grid w-full gap-12 lg:grid-cols-12 lg:items-center mt-24 lg:mt-0">
+          
+          {/* SISI KIRI: Teks Sambutan & Deskripsi (Lebar Proporsional dengan Box Login) */}
+          <div data-ct-dark className="lg:col-span-5">
+            <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Welcome back.
+            </h1>
+            <p className="mt-4 max-w-md text-pretty text-base leading-relaxed text-slate-200/90">
+              Log in to your career command center. This is a frontend-only demo; authentication is
+              mocked behind a REST-ready API layer.
+            </p>
+          </div>
+
+          {/* SISI KANAN: Box Login / Form Input */}
+          <div className="lg:col-span-5 lg:col-start-8">
+            {/* Lanjutkan kode Box Login Anda tepat di bawah baris ini */}
+
             <Card className="w-full max-w-md rounded-3xl border-teal-800 bg-[#0d4a4d] p-6 shadow-xl">
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
