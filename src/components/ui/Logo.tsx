@@ -25,7 +25,7 @@ export function Logo({
         <div className="absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_30%_20%,rgba(20,184,166,0.35),transparent_55%),radial-gradient(circle_at_70%_70%,rgba(234,179,8,0.2),transparent_55%)]" />
         <div className="relative w-full h-full p-1.5 flex items-center justify-center">
           <img 
-            src="Public\Logo.png" // Sedikit koreksi: path folder public di web disarankan memakai /Logo.png agar terbaca di semua route
+            src="/Logo.png" // Sedikit koreksi: path folder public di web disarankan memakai /Logo.png agar terbaca di semua route
             alt="Logo" 
             className={cn("object-contain", compact ? "h-6 w-6" : "h-8 w-8")} 
           />

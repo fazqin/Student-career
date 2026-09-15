@@ -95,7 +95,7 @@ export function Hero({ className }: { className?: string }) {
 
               {/* 3. TOMBOL AKSI: Memastikan tombol berjejer tengah secara flex row */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center w-full">
-                <a href="/register" className="w-full sm:w-auto">
+                <a href="#register" className="w-full sm:w-auto">
                   <Button variant="primary" size="lg" className="w-full sm:w-auto">
                     Start Tracking <ArrowRight className="h-4 w-4" />
                   </Button>

@@ -8,7 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 
 export default function Register() {
   const nav = useNavigate();
-  const [name, setName] = useState("Faza Rahman");
+  const [name, setName] = useState("Faza Ganteng");
   const [email, setEmail] = useState("faza@student.example");
   const [password, setPassword] = useState("demo");
   const [loading, setLoading] = useState(false);
