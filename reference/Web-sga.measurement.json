@@ -1,0 +1,58 @@
+{
+  "source": {
+    "file": "Web-sga.png",
+    "width": 2740,
+    "height": 10684
+  },
+  "measurement": {
+    "k": 8,
+    "sampling": {
+      "method": "deterministic_stratified",
+      "max_pixels": 160000,
+      "sampled_pixels": 160000
+    }
+  },
+  "palette": [
+    {
+      "hex": "#fcfcfd",
+      "coverage": 0.411,
+      "role": "background"
+    },
+    {
+      "hex": "#0e4555",
+      "coverage": 0.3557,
+      "role": "accent"
+    },
+    {
+      "hex": "#1e666d",
+      "coverage": 0.152,
+      "role": "unassigned"
+    },
+    {
+      "hex": "#bebec1",
+      "coverage": 0.0282,
+      "role": "unassigned"
+    },
+    {
+      "hex": "#828978",
+      "coverage": 0.025,
+      "role": "unassigned"
+    },
+    {
+      "hex": "#d8b35d",
+      "coverage": 0.0141,
+      "role": "unassigned"
+    },
+    {
+      "hex": "#242224",
+      "coverage": 0.0125,
+      "role": "text"
+    },
+    {
+      "hex": "#0a96c2",
+      "coverage": 0.0015,
+      "role": "unassigned"
+    }
+  ],
+  "measured": true
+}

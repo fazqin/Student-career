@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+:root {
+  --bg: 248 250 252;
+  --panel: 255 255 255;
+  --text: 15 23 42;
+  --muted: 71 85 105;
+  --border: 203 213 225;
+  --accent: 8 51 53;
+  --accent2: 20 184 166;
+  --gold: 234 179 8;
+  --hero-bg: 8 51 53;
+  --hero-card: 11 62 64;
+  --text-dark: 15 23 42;
+  --text-muted: 30 41 59;
+  --success: 20 184 166;
+  --warning: 234 179 8;
+  --danger: 169 68 66;
+  --info: 14 165 233;
+
+  --radius-sm: 0px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+
+  --shadow-low: 0 2px 8px rgb(8 51 53 / 8%);
+  --shadow-medium: 0 10px 24px rgb(8 51 53 / 12%);
+  --shadow-high: 0 20px 48px rgb(8 51 53 / 18%);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: Montserrat, Poppins, Arial, ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, sans-serif;
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgb(var(--gold) / 45%);
+  color: rgb(var(--text-dark));
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent) / 35%) rgb(var(--border) / 25%);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgb(var(--border) / 18%);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--accent) / 35%);
+  border: 2px solid rgb(var(--bg));
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Solid surfaces replace former translucent glass. */
+.glass,
+.glass-strong {
+  background: rgb(var(--panel));
+  border: 1px solid rgb(var(--border));
+  box-shadow: var(--shadow-low);
+}
+
+.glass-strong {
+  box-shadow: var(--shadow-medium);
+}
+
+.grid-fade {
+  background-image: linear-gradient(to right, rgb(20 184 166 / 16%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(20 184 166 / 16%) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 30%, black 0%, transparent 70%);
+}
+
+.noise::before {
+  content: none;
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--gold) / 45%);
+}
+
+/* Landing content after Hero is intentionally light. Existing dark-theme utilities need overrides. */
+[data-ct-light] [class*="text-white/"] {
+  color: rgb(var(--text-muted));
+}
+
+[data-ct-light] .text-white {
+  color: rgb(var(--text-dark));
+}
+
+[data-ct-light] [class*="border-white/"] {
+  border-color: rgb(var(--border));
+}
+
+[data-ct-light] [class*="bg-white/"] {
+  background-color: rgb(var(--panel));
+}
+
+[data-ct-light] [class*="bg-black/"] {
+  background-color: rgb(241 245 249);
+}
+
+[data-ct-light] [class*="hover:bg-white/"]:hover {
+  background-color: rgb(241 245 249);
+}
+
+[data-ct-light] [class*="hover:border-white/"]:hover {
+  border-color: rgb(var(--accent2));
+}
+
+[data-ct-light] [data-ct-dark] .text-white,
+[data-ct-light] [data-ct-dark] [class*="text-white/"] {
+  color: white;
+}
+
+[data-ct-light] [data-ct-dark] [class*="border-white/"] {
+  border-color: rgb(255 255 255 / 15%);
+}

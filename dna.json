@@ -1,0 +1,418 @@
+{
+  "meta": {
+    "name": "SGA Cakrawala School Profile",
+    "description": "DNA desain situs profil sekolah berbahasa Indonesia: hero fotografi berlapis overlay teal, konten editorial modular, dan CTA emas.",
+    "source_references": [
+      "reference/Web-sga.png"
+    ],
+    "created_at": "2026-09-15"
+  },
+  "design_system": {
+    "color": {
+      "palette_type": "analogous",
+      "primary": {
+        "hex": "#0e4555",
+        "role": "warna brand utama untuk hero overlay, header gelap, footer, dan CTA kontras"
+      },
+      "secondary": {
+        "hex": "#1e666d",
+        "role": "teal sekunder untuk panel, hover, dan lapisan visual"
+      },
+      "accent": {
+        "hex": "#d8b35d",
+        "role": "emas hangat untuk garis dekoratif, CTA, penekanan angka, dan detail premium"
+      },
+      "neutral": {
+        "scale": [
+          "#fcfcfd",
+          "#bebec1",
+          "#828978",
+          "#242224"
+        ],
+        "usage": "#fcfcfd untuk latar dominan; #bebec1 untuk border dan teks redup; #828978 untuk metadata; #242224 sebagai teks utama di permukaan terang. Teks pada #0e4555 memakai putih atau mendekati putih."
+      },
+      "semantic": {
+        "success": "#1e666d",
+        "warning": "#d8b35d",
+        "error": "#a94442",
+        "info": "#0a96c2"
+      },
+      "surface": {
+        "background": "#fcfcfd",
+        "card": "#fcfcfd",
+        "elevated": "#ffffff"
+      },
+      "contrast_strategy": "dark-on-light dominant; blok teal gelap membalik teks menjadi putih; emas dipakai sebagai penanda, bukan teks isi kecil.",
+      "measurement": {
+        "k": 8,
+        "sampling": {
+          "method": "deterministic_stratified",
+          "max_pixels": 160000,
+          "sampled_pixels": 160000
+        }
+      },
+      "measured_palette": [
+        {
+          "hex": "#fcfcfd",
+          "coverage": 0.411,
+          "role": "background"
+        },
+        {
+          "hex": "#0e4555",
+          "coverage": 0.3557,
+          "role": "accent"
+        },
+        {
+          "hex": "#1e666d",
+          "coverage": 0.152,
+          "role": "unassigned"
+        },
+        {
+          "hex": "#bebec1",
+          "coverage": 0.0282,
+          "role": "unassigned"
+        },
+        {
+          "hex": "#828978",
+          "coverage": 0.025,
+          "role": "unassigned"
+        },
+        {
+          "hex": "#d8b35d",
+          "coverage": 0.0141,
+          "role": "unassigned"
+        },
+        {
+          "hex": "#242224",
+          "coverage": 0.0125,
+          "role": "text"
+        },
+        {
+          "hex": "#0a96c2",
+          "coverage": 0.0015,
+          "role": "unassigned"
+        }
+      ]
+    },
+    "typography": {
+      "type_scale": {
+        "display": {
+          "size": "clamp(3rem, 6vw, 5.5rem)",
+          "weight": "700",
+          "line_height": "0.98",
+          "tracking": "-0.035em"
+        },
+        "heading_1": {
+          "size": "clamp(2.25rem, 4vw, 4rem)",
+          "weight": "700",
+          "line_height": "1.05",
+          "tracking": "-0.025em"
+        },
+        "heading_2": {
+          "size": "clamp(1.75rem, 3vw, 2.75rem)",
+          "weight": "700",
+          "line_height": "1.15",
+          "tracking": "-0.02em"
+        },
+        "heading_3": {
+          "size": "1.375rem",
+          "weight": "700",
+          "line_height": "1.25",
+          "tracking": "-0.01em"
+        },
+        "body": {
+          "size": "1rem",
+          "weight": "400",
+          "line_height": "1.7",
+          "tracking": "0em"
+        },
+        "body_small": {
+          "size": "0.875rem",
+          "weight": "400",
+          "line_height": "1.6",
+          "tracking": "0em"
+        },
+        "caption": {
+          "size": "0.75rem",
+          "weight": "500",
+          "line_height": "1.45",
+          "tracking": "0.02em"
+        },
+        "overline": {
+          "size": "0.6875rem",
+          "weight": "700",
+          "line_height": "1.3",
+          "tracking": "0.14em"
+        }
+      },
+      "font_families": {
+        "heading": "Montserrat, Poppins, Arial, sans-serif",
+        "body": "Montserrat, Poppins, Arial, sans-serif",
+        "mono": "ui-monospace, SFMono-Regular, Consolas, monospace"
+      },
+      "font_style_notes": "Sans geometris modern dengan heading sangat tebal dan rapat. Huruf kapital serta tracking lebar dipakai pada label navigasi dan overline; body tetap lapang dan mudah dibaca."
+    },
+    "spacing": {
+      "base_unit": "8px",
+      "scale": ["4px", "8px", "12px", "16px", "24px", "32px", "48px", "64px", "96px", "128px"],
+      "content_density": "comfortable",
+      "section_rhythm": "Section vertikal lebar, umumnya 96–128px desktop; elemen dalam section mengikuti kelipatan 8px dengan gap 24–48px."
+    },
+    "layout": {
+      "grid_system": "12-column responsive grid; panel editorial sering dibagi 5/7 atau 6/6 kolom.",
+      "max_content_width": "1280px",
+      "columns": "12 desktop, 8 tablet, 4 mobile",
+      "gutter": "24px desktop; 16px mobile",
+      "breakpoints": {
+        "mobile": "0–767px",
+        "tablet": "768–1023px",
+        "desktop": "1024px+",
+        "wide": "1440px+"
+      },
+      "alignment_tendency": "strict grid dengan campuran full-bleed hero dan blok konten kiri."
+    },
+    "shape": {
+      "border_radius": {
+        "small": "0px",
+        "medium": "4px",
+        "large": "8px",
+        "pill": "999px"
+      },
+      "border_usage": "subtle 1px pada kartu dan input; mayoritas komponen memakai sudut tajam atau nyaris tajam.",
+      "divider_style": "1px solid #bebec1 pada opacity rendah; garis emas pendek sebagai separator aksen."
+    },
+    "elevation": {
+      "shadow_style": "minimal soft diffused",
+      "levels": {
+        "low": "0 2px 8px rgba(14, 69, 85, 0.08)",
+        "medium": "0 10px 24px rgba(14, 69, 85, 0.12)",
+        "high": "0 20px 48px rgba(14, 69, 85, 0.18)"
+      },
+      "depth_cues": "color intensity, image overlays, dan blok bertumpuk; shadow bukan elemen dominan."
+    },
+    "iconography": {
+      "style": "ikon garis minimal dan simbol sosial sederhana",
+      "stroke_weight": "1.5–2px",
+      "size_scale": ["16px", "20px", "24px", "32px", "48px"],
+      "preferred_set": "Lucide-style outline icons atau SVG kustom monoline"
+    },
+    "motion": {
+      "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "duration_scale": {
+        "micro": "150ms",
+        "normal": "300ms",
+        "macro": "600ms"
+      },
+      "entrance_pattern": "fade-up ringan untuk section dan kartu saat memasuki viewport",
+      "exit_pattern": "fade-subtle",
+      "philosophy": "minimal functional; gerak memperjelas navigasi dan hover tanpa mengalahkan konten."
+    },
+    "components": {
+      "button_style": "CTA persegi/nyaris persegi, fill teal atau emas, teks uppercase tebal, padding horizontal 24–32px.",
+      "input_style": "permukaan putih, border 1px abu netral, label eksplisit, radius kecil.",
+      "card_style": "kartu fotografi atau konten editorial dengan radius kecil, border tipis, dan hover elevasi ringan.",
+      "navigation_pattern": "header horizontal dengan logo kiri, menu uppercase di tengah/kanan, CTA atau utilitas di ujung kanan; berubah menjadi menu drawer di mobile.",
+      "modal_style": "panel putih sederhana dengan overlay teal gelap semi-transparan dan radius kecil.",
+      "list_style": "daftar vertikal berjarak dengan thumbnail atau penanda garis emas.",
+      "component_notes": "Komponen menonjol lewat blok warna dan fotografi, bukan banyak chrome UI. CTA emas dipakai hemat agar tetap spesial."
+    }
+  },
+  "design_style": {
+    "aesthetic": {
+      "mood": ["profesional", "hangat", "aspiratif", "terpercaya", "institusional-modern"],
+      "visual_metaphor": "cakrawala pendidikan: perjalanan, pertumbuhan, dan peluang masa depan.",
+      "era_influence": "corporate editorial kontemporer 2020-an",
+      "genre": "website profil sekolah premium",
+      "personality_traits": ["percaya diri", "terstruktur", "peduli", "berorientasi prestasi"],
+      "adjectives": ["teal", "editorial", "berkelas", "bersih", "berorientasi manusia"]
+    },
+    "visual_language": {
+      "complexity": "moderate",
+      "ornamentation": "subtle accents",
+      "whitespace_usage": "lapang, terutama antara section dan di sekitar heading besar",
+      "visual_weight_distribution": "hero foto-beroverlay dan blok teal membawa bobot terbesar; latar putih menjaga alur baca ringan",
+      "focal_strategy": "single hero element lalu progressive reveal melalui section editorial",
+      "contrast_level": "tinggi antara teal gelap, putih, dan aksen emas",
+      "texture_usage": "tekstur berasal dari fotografi sekolah; permukaan UI tetap datar dan bersih"
+    },
+    "composition": {
+      "hierarchy_method": "scale contrast, color weight, dan typographic hierarchy",
+      "balance_type": "asymmetric editorial dalam grid ketat",
+      "flow_direction": "vertikal dari hero penuh ke section konten modular; scan kiri-ke-kanan di desktop",
+      "grouping_strategy": "blok warna, gap section besar, dan garis aksen emas mengelompokkan narasi",
+      "negative_space_role": "membingkai konten premium dan memberi jeda antar cerita/foto"
+    },
+    "imagery": {
+      "photo_treatment": "fotografi autentik siswa dan aktivitas sekolah, crop editorial, kadang diberi overlay teal gelap",
+      "illustration_style": "minimal; ilustrasi bukan elemen utama",
+      "graphic_elements": "garis emas pendek, angka besar, panel warna solid, dan overlay transparan",
+      "pattern_usage": "none",
+      "image_shape": "rasio editorial persegi panjang, beberapa full-bleed, radius sangat kecil atau tanpa radius"
+    },
+    "interaction_feel": {
+      "feedback_style": "perubahan warna, underline, dan elevasi ringan",
+      "hover_behavior": "gambar sedikit zoom atau overlay menguat; tautan/menu berubah ke emas atau teal lebih terang",
+      "transition_personality": "smooth glide",
+      "loading_style": "minimal; placeholder/loader netral tanpa animasi dekoratif berat",
+      "microinteraction_density": "low"
+    },
+    "brand_voice_in_ui": {
+      "tone": "meyakinkan, suportif, dan aspiratif",
+      "formality": "semi-formal institusional",
+      "cta_style": "friendly invitation",
+      "empty_state_approach": "pesan singkat, positif, dengan tindakan lanjutan jelas",
+      "error_tone": "jelas, tenang, dan solutif tanpa menyalahkan pengguna"
+    }
+  },
+  "visual_effects": {
+    "overview": {
+      "effect_intensity": "subtle-accent",
+      "performance_tier": "lightweight",
+      "fallback_strategy": "reduce to CSS dan tampilkan foto/permukaan statis bila reduced-motion aktif",
+      "primary_technology": "CSS only"
+    },
+    "background_effects": {
+      "type": "none",
+      "description": "Tidak ada efek latar generatif terlihat; latar memakai warna solid, foto, dan overlay teal.",
+      "technology": "CSS",
+      "params": {
+        "color_palette": ["#fcfcfd", "#0e4555", "#1e666d", "#d8b35d"],
+        "speed": "0ms",
+        "density": "none",
+        "opacity": "0",
+        "blend_mode": "normal"
+      }
+    },
+    "particle_systems": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat partikel.",
+      "technology": "none",
+      "params": {
+        "count": 0,
+        "shape": "none",
+        "size_range": "0px",
+        "movement_pattern": "none",
+        "color_behavior": "none",
+        "interaction": "none",
+        "spawn_area": "none"
+      }
+    },
+    "3d_elements": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat elemen 3D.",
+      "technology": "none",
+      "params": {
+        "renderer": "none",
+        "lighting": "none",
+        "camera": "none",
+        "materials": "none",
+        "geometry": "none",
+        "post_processing": [],
+        "interaction_model": "none"
+      }
+    },
+    "shader_effects": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat shader atau distorsi GPU.",
+      "technology": "none",
+      "params": {
+        "uniforms": [],
+        "vertex_manipulation": "none",
+        "fragment_output": "none",
+        "noise_type": "none",
+        "distortion": "none"
+      }
+    },
+    "scroll_effects": {
+      "parallax": {
+        "enabled": false,
+        "layers": 0,
+        "depth_range": "0px",
+        "speed_curve": "none"
+      },
+      "scroll_triggered_animations": {
+        "enabled": false,
+        "trigger_points": "none observed in static screenshot",
+        "animation_type": "none",
+        "scrub_behavior": "none"
+      },
+      "scroll_morphing": {
+        "enabled": false,
+        "description": "Tidak terlihat morphing berbasis scroll."
+      }
+    },
+    "text_effects": {
+      "type": "none",
+      "description": "Hierarki teks dibentuk oleh ukuran, weight, dan warna; tidak terlihat efek teks khusus.",
+      "technology": "CSS typography",
+      "params": {
+        "split_strategy": "none",
+        "animation_per_unit": "none",
+        "stagger": "0ms",
+        "effect_style": "none"
+      }
+    },
+    "cursor_effects": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat cursor kustom.",
+      "params": {
+        "shape": "default",
+        "size": "default",
+        "blend_mode": "normal",
+        "trail": false,
+        "interaction_zone": "none"
+      }
+    },
+    "image_effects": {
+      "type": "none",
+      "description": "Foto memakai crop editorial dan overlay warna; tidak ada distorsi khusus yang terlihat.",
+      "technology": "CSS",
+      "params": {
+        "filter_pipeline": "teal overlay on selected hero images",
+        "hover_transform": "subtle scale(1.03) recommended",
+        "reveal_animation": "none observed",
+        "distortion_type": "none"
+      }
+    },
+    "glassmorphism_neumorphism": {
+      "enabled": false,
+      "style": "none",
+      "params": {
+        "blur_radius": "0px",
+        "transparency": "0",
+        "border_treatment": "none",
+        "shadow_type": "minimal soft diffused",
+        "light_source_angle": "none"
+      }
+    },
+    "canvas_drawings": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat Canvas.",
+      "technology": "none",
+      "params": {
+        "draw_method": "none",
+        "animation_loop": false,
+        "color_scheme": "none",
+        "responsiveness": "none",
+        "interaction": "none"
+      }
+    },
+    "svg_animations": {
+      "enabled": false,
+      "type": "none",
+      "description": "Tidak terlihat animasi SVG.",
+      "params": {
+        "animation_method": "none",
+        "path_morphing": false,
+        "stroke_animation": false,
+        "filter_effects": "none"
+      }
+    },
+    "composite_notes": "Screenshot statis memperlihatkan visual berbasis CSS standar: full-bleed photography, overlay teal, blok warna solid, garis emas, dan kartu editorial. Bila animasi ditambahkan, batasi pada hover, fade-up saat scroll, dan zoom gambar kecil; hormati prefers-reduced-motion."
+  }
+}
