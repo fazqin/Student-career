@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
@@ -10,16 +11,52 @@ const nav = [
 ];
 
 export function LandingNavbar({ className }: { className?: string }) {
+  const [isTop, setIsTop] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsTop(false);
+      } else {
+        setIsTop(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <header className={cn("fixed left-0 right-0 top-0 z-50", className)}>
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-        <div data-ct-dark className="mx-auto mt-2 sm:mt-4 lg:mt-6 flex h-16 w-full max-w-5xl items-center justify-between rounded-full border border-white/5 bg-[#0b3e40]/85 backdrop-blur-md shadow-2xl px-4 sm:px-6 lg:px-8 transition-all duration-500 ease-in-out">
+    <header 
+      className={cn(
+        "fixed left-0 right-0 top-0 z-50 transition-all duration-500 ease-in-out", 
+        // Kunci: Berikan space konstan mt-4 ke atas layar di semua kondisi agar tidak mepet dinding browser
+        "mt-4 sm:mt-6", 
+        className
+      )}
+    >
+      {/* Menggunakan max-w-full pada container pembungkus agar saat transparan bisa melebar bebas */}
+      <div className={cn(
+        "mx-auto w-full transition-all duration-500 ease-in-out",
+        isTop ? "max-w-7xl px-4 sm:px-6" : "max-w-7xl px-4 sm:px-6"
+      )}>
+        <div 
+          data-ct-dark 
+          className={cn(
+            "mx-auto flex h-16 w-full items-center justify-between border transition-all duration-500 ease-in-out",
+            // Penyesuaian Style:
+            isTop 
+              ? "max-w-7xl rounded-none border-transparent bg-transparent shadow-none px-2 sm:px-4" // Transparan di atas: Tetap menjaga grid keselarasan halaman tanpa border kotak
+              : "max-w-5xl rounded-full border-white/5 bg-[#0b3e40]/85 backdrop-blur-md shadow-2xl px-4 sm:px-6 lg:px-8" // Pas scroll: Mengempis jadi kapsul melayang yang indah
+          )}
+        >
+
 
           <Link to="/" className="flex h-full min-w-0 items-center justify-center">
             <img 
-              src="Public\Logo.png" 
+              src="/Logo.png" 
               alt="Logo" 
-              className="h-[65px] w-auto shrink-0 object-contain transition-all duration-500 ease-in-out hover:scale-105" 
+              className="h-[55px] w-auto shrink-0 object-contain transition-all duration-500 ease-in-out hover:scale-105" 
             />
           </Link>
 
@@ -37,11 +74,9 @@ export function LandingNavbar({ className }: { className?: string }) {
 
           <div className="flex items-center gap-5">
             <NavLink to="/login" className="hidden sm:block">
-              {/* Tombol Login dibuat bersih berupa text link agar tidak tabrakan estetika */}
               <span className="text-sm font-medium text-white/80 hover:text-white transition">Login</span>
             </NavLink>
             <NavLink to="/register">
-              {/* Ditambahkan rounded-full kustom jika button komponen mendukung className, atau langsung pakai style kapsul */}
               <Button 
                 variant="primary" 
                 size="md" 

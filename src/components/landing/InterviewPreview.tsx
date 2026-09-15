@@ -24,14 +24,14 @@ export function InterviewPreview() {
           )}
         >
           <div className="lg:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
-              <span className="h-1.5 w-1.5 rounded-full bg-[rgba(var(--accent2),0.9)]" />
-              Interviews
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500 bg-white/5 px-3 py-1.5 text-xs text-white/70">
+              <span className=" rounded-full text-slate-800 bg-[rgba(var(--accent2),0.9)]" />
+              <p className="font-xl text-slate-900">Interviews</p>
             </div>
-            <h3 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-white">
+            <h3 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-slate-900">
               A timeline that keeps you ready.
             </h3>
-            <p className="mt-4 text-pretty text-base text-white/60">
+            <p className="mt-4 text-pretty text-base text-slate-900">
               Upcoming interviews appear in a clean timeline — what’s next, who it’s with, and where
               you need to be.
             </p>

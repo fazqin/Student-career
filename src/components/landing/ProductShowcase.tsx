@@ -20,12 +20,12 @@ export function ProductShowcase() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
             <span className="h-1.5 w-1.5 rounded-full bg-[rgba(var(--accent2),0.9)]" />
-            Product interface preview
+            <p className="font-medium text-slate-900">Product interface preview</p>
           </div>
-          <h2 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <h2 className="mt-5 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             A calm workspace for high-stakes decisions.
           </h2>
-          <p className="mt-4 text-pretty text-base text-white/60">
+          <p className="mt-4 text-pretty text-base text-slate-900">
             CareerTrack turns scattered notes and tabs into a single command center — with stages,
             deadlines, interviews, and analytics designed to feel effortless.
           </p>

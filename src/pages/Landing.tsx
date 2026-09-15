@@ -80,22 +80,63 @@ export default function Landing() {
   }, [reducedMotion]);
 
   return (
-    <div ref={rootRef} className="min-h-screen">
+    <div ref={rootRef} className="min-h-screen bg-[#0b3e40] overflow-x-hidden">
       <LandingNavbar />
+      
+      {/* Seluruh area seksi dibungkus relative agar hirarki sticky berjalan mulus */}
       <div className="relative">
-        <Hero />
-        <div data-ct-light>
+        
+        {/* 1. HERO SECTION (Lapisan Paling Bawah - Z-0) */}
+        <div className="sticky top-0 z-0 w-full min-h-screen">
+          <Hero />
+        </div>
+
+        {/* 2. PRODUCT SHOWCASE (Warna: Putih) */}
+        <div className="relative sticky top-0 z-10 w-full min-h-screen bg-white text-slate-900 shadow-[0_-20px_40px_rgba(0,0,0,0.06)]">
           <ProductShowcase />
+        </div>
+
+        {/* 3. FEATURE STORY (Warna: Hijau Tua) */}
+        <div className="relative sticky top-0 z-20 w-full min-h-screen bg-[#0b3e40] text-white shadow-[0_-20px_40px_rgba(0,0,0,0.15)]">
           <FeatureStory />
+        </div>
+
+        {/* 4. TRACKING KANBAN (Warna: Putih) */}
+        <div className="relative sticky top-0 z-30 w-full min-h-screen bg-white text-slate-900 shadow-[0_-20px_40px_rgba(0,0,0,0.06)]">
           <TrackingKanban />
+        </div>
+
+        {/* 5. LANDING ANALYTICS (Warna: Hijau Tua) */}
+        <div className="relative sticky top-0 z-40 w-full min-h-screen bg-[#0b3e40] text-white shadow-[0_-20px_40px_rgba(0,0,0,0.15)]">
           <LandingAnalytics />
+        </div>
+
+        {/* 6. INTERVIEW PREVIEW (Warna: Putih) */}
+        <div className="relative sticky top-0 z-50 w-full min-h-screen bg-white text-slate-900 shadow-[0_-20px_40px_rgba(0,0,0,0.06)]">
           <InterviewPreview />
+        </div>
+
+        {/* 7. INTELLIGENCE SECTION (Warna: Hijau Tua) */}
+        <div className="relative sticky top-0 z-50 w-full min-h-screen bg-[#0b3e40] text-white shadow-[0_-20px_40px_rgba(0,0,0,0.15)]">
           <IntelligenceSection />
+        </div>
+
+        {/* 8. CREDIBILITY (Warna: Putih) */}
+        <div className="relative sticky top-0 z-50 w-full min-h-screen bg-white text-slate-900 shadow-[0_-20px_40px_rgba(0,0,0,0.06)]">
           <Credibility />
+        </div>
+
+        {/* 9. CTA SECTION (Lapisan Paling Atas - Warna: Hijau Tua) */}
+        <div className="relative sticky top-0 z-50 w-full min-h-screen bg-[#0b3e40] text-white shadow-[0_-20px_40px_rgba(0,0,0,0.15)]">
           <CTASection />
         </div>
+
       </div>
-      <Footer />
+
+      {/* Footer ditumpuk paling atas di bagian akhir halaman */}
+      <div className="relative z-50 bg-[#062425]">
+        <Footer />
+      </div>
     </div>
   );
 }
