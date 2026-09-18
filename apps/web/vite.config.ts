@@ -10,6 +10,8 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: __dirname,
+  publicDir: path.resolve(__dirname, "public"),
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: {
