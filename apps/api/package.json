@@ -1,11 +1,12 @@
 {
-  "name": "api",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "name": "@careertrack/api",
+  "version": "1.0.0",
+  "main": "server.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node --watch server.js",
     "start": "node server.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
