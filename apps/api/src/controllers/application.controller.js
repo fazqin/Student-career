@@ -15,7 +15,7 @@ const applications = [
     }
 ];
 
-// GET: Mengambil semua data lamaran/applications
+// GET semua
 const getAllApplications = (req, res) => {
     res.status(200).json({
         status: "success",
@@ -23,20 +23,21 @@ const getAllApplications = (req, res) => {
     });
 };
 
-// GET: Mengambil data lamaran berdasarkan ID
+// GET spesifik by id
 const getApplicationById = (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const appItem = applications.find((item) => item.id === id);
+    const cariItem = applications.find((item) => item.id === id);
 
-    if (appItem) {
+    // buat logic pesan pemberitahuan aja 
+    if (carItem) {
         res.status(200).json({
             status: "success",
-            data: appItem
+            data: cariItem
         });
     } else {
         res.status(404).json({
             status: "error",
-            message: "Application Not Found"
+            message: "Ga ditemukan"
         });
     }
 };
