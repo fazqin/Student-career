@@ -14,6 +14,4 @@ router.get("/companies", getAllCompanies);
 // /api/companies/:id
 router.get("/companies/:id", getCompanyById);
 
-
-
 module.exports = router;

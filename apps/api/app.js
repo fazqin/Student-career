@@ -12,5 +12,4 @@ app.use("/api", router);
 app.use("/api", JobRouter);
 app.use("/api", CompanyRouter);
 
-
 module.exports = app;

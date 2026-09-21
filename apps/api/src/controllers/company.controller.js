@@ -15,12 +15,10 @@ const companies = [
     }
 ];
 
-
 // GET semua company
 const getAllCompanies = (req, res) => {
     res.json(companies);
 };
-
 
 // GET company berdasarkan id
 const getCompanyById = (req, res) => {
@@ -36,7 +34,6 @@ const getCompanyById = (req, res) => {
             error: "Company Not Found"
         });
     }
-
 };
 
 module.exports = {
