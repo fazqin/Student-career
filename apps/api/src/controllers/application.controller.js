@@ -26,13 +26,13 @@ const getAllApplications = (req, res) => {
 // GET spesifik by id
 const getApplicationById = (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const cariItem = applications.find((item) => item.id === id);
+    const appItem = applications.find((item) => item.id === id);
 
     // buat logic pesan pemberitahuan aja 
-    if (carItem) {
+    if (appItem) {
         res.status(200).json({
             status: "success",
-            data: cariItem
+            data: appItem
         });
     } else {
         res.status(404).json({
