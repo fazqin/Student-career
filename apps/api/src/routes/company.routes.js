@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const companies = [
     {
         id: 1,
@@ -31,10 +32,10 @@ router.get("/companies/:id", (req, res) => {
     if (company) {
         res.json(company);
     } else {
+
         res.status(404).json({
             error: "Company Not Found"
         });
     }
 });
-
 module.exports = router;
