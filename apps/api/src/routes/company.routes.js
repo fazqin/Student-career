@@ -8,10 +8,10 @@ const {
 
 // GET semua company
 // /api/companies
-router.get("/companies", getAllCompanies);
+router.get("/", getAllCompanies);
 
 // GET company berdasarkan id
 // /api/companies/:id
-router.get("/companies/:id", getCompanyById);
+router.get("/:id", getCompanyById);
 
 module.exports = router;

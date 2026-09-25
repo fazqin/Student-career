@@ -2,8 +2,8 @@ const getNameById = (req, res) => {
     const id = parseInt(req.params.id, 10);
 
     const names = [
-        {id: 1, name: "Faza"}, 
-        {id: 2, name: "Budi"}, 
+        {id: 1, name: "Faza"},
+        {id: 2, name: "Budi"},
         {id: 3, name: "Andi"}
 
     ];
