@@ -36,7 +36,20 @@ const getCompanyById = (req, res) => {
     }
 };
 
+const postAllCompany = (req, res) => {
+    const {name, industry, location, website} = req.body;
+    const newCompany = {
+        id: companies.length + 1,
+        name,
+        industry,
+        location,
+        website
+    }
+    companies.push(newCompany);
+    res.status(201).json(newCompany);
+};
 module.exports = {
     getAllCompanies,
-    getCompanyById
+    getCompanyById,
+    postAllCompany
 };

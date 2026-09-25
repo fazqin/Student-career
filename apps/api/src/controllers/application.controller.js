@@ -12,7 +12,15 @@ const applications = [
         position: "Backend Developer", 
         status: "Interview", 
         deadline: "2026-04-05" 
+    },
+    {
+        id: 3,
+        company: "Creative Agency",
+        position: "UI/UX Designer",
+        status: "Rejected",
+        deadline: "2026-04-10"
     }
+
 ];
 
 // GET semua
