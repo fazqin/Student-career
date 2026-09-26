@@ -1,4 +1,4 @@
-const interview = [
+const interviews = [
     {
         id: 1,
         application_id: 1,
@@ -21,32 +21,111 @@ const interview = [
 
 // GET semua
 const getAllInterviews = (req, res) => {
-    res.status(200).json({
-        status: "success",
-        data: interview
-    });
+    res.json(interviews);
 };
 
 // GET spesifik by id
 const getInterviewById = (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const interviewItem = interview.find((item) => item.id === id);
+    const interviewItem = interviews.find((item) => item.id === id);
 
-    // buat logic pesan pemberitahuan aja 
     if (interviewItem) {
+        res.json(interviewItem);
+    } else {
+        res.status(404).json({
+            error: "Interview Not Found"
+        });
+    }
+};
+
+//POST tambah interview baru
+const createInterview = (req, res) => {
+    const { application_id, company, position, interview_date, type, status } = req.body;
+
+    const newInterview = {
+        id: interviews.length + 1,
+        application_id,
+        company,
+        position,
+        interview_date,
+        type,
+        status
+    };
+
+    interviews.push(newInterview);
+    res.status(201).json(newInterview);
+};
+
+//PUT update seluruh data
+const updateInterview = (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const index = interviews.findIndex((item) => item.id === id);
+    const interviewItem = interviews[index];
+
+    const { application_id, company, position, interview_date, type, status } = req.body;
+
+    if (interviewItem) {
+        interviewItem.application_id = application_id;
+        interviewItem.company = company;
+        interviewItem.position = position;
+        interviewItem.interview_date = interview_date;
+        interviewItem.type = type;
+        interviewItem.status = status;
+
+        res.json(interviewItem);
+    } else {
+        res.status(404).json({
+            error: "Interview Not Found"
+        });
+    }
+};
+
+//PATCH update sebagian data
+const patchInterview = (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const interviewItem = interviews.find((item) => item.id === id);
+
+    const { application_id, company, position, interview_date, type, status } = req.body;
+
+    if (interviewItem) {
+        if (application_id) interviewItem.application_id = application_id;
+        if (company) interviewItem.company = company;
+        if (position) interviewItem.position = position;
+        if (interview_date) interviewItem.interview_date = interview_date;
+        if (type) interviewItem.type = type;
+        if (status) interviewItem.status = status;
+
+        res.json(interviewItem);
+    } else {
+        res.status(404).json({
+            error: "Interview Not Found"
+        });
+    }
+};
+
+// DELETE hapus interview
+const deleteInterview = (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const index = interviews.findIndex((item) => item.id === id);
+
+    if (index !== -1) {
+        interviews.splice(index, 1);
+
         res.status(200).json({
-            status: "success",
-            data: interviewItem
+            message: "Interview deleted successfully"
         });
     } else {
         res.status(404).json({
-            status: "error",
-            message: "Ga ditemukan"
+            error: "Interview Not Found"
         });
     }
 };
 
 module.exports = {
     getAllInterviews,
-    getInterviewById
+    getInterviewById,
+    createInterview,
+    updateInterview,
+    patchInterview,
+    deleteInterview
 };
