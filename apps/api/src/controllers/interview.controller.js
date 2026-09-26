@@ -1,17 +1,21 @@
 const interview = [
-    { 
-        id: 1, 
-        company: "PT OTW KAYA", 
-        position: "QA", 
-        status: "Applied", 
-        deadline: "2026-03-30" 
+    {
+        id: 1,
+        application_id: 1,
+        company: "PT OTW KAYA",
+        position: "QA",
+        interview_date: "2026-04-01T10:00:00Z",
+        type: "Online (Google Meet)",
+        status: "Scheduled"
     },
-    { 
-        id: 2, 
-        company: "Tech Corp", 
-        position: "Backend Developer", 
-        status: "On Going", 
-        deadline: "2026-04-05" 
+    {
+        id: 2,
+        application_id: 2,
+        company: "Tech Corp",
+        position: "Backend Developer",
+        interview_date: "2026-04-06T14:00:00Z",
+        type: "Offline (User Interview)",
+        status: "Completed"
     }
 ];
 

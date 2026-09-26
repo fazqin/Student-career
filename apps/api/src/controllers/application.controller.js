@@ -24,10 +24,7 @@ const applications = [
 
 // GET semua
 const getAllApplications = (req, res) => {
-    res.status(200).json({
-        status: "success",
-        data: applications
-    });
+    res.json(applications);
 };
 
 // GET spesifik by id
@@ -36,14 +33,10 @@ const getApplicationById = (req, res) => {
     const appItem = applications.find((item) => item.id === id);
 
     if (appItem) {
-        res.status(200).json({
-            status: "success",
-            data: appItem
-        });
+        res.json(appItem);
     } else {
         res.status(404).json({
-            status: "error",
-            message: "daftar lamaran tidak ditemukan"
+            error: "Application Not Found"
         });
     }
 };
@@ -52,48 +45,36 @@ const getApplicationById = (req, res) => {
 const createApplication = (req, res) => {
     const { company, position, status, deadline } = req.body;
 
-    const newApp = {
-        id: applications.length > 0 ? applications[applications.length - 1].id + 1 : 1,
-        company: company || "",
-        position: position || "",
-        status: status || "Applied",
-        deadline: deadline || ""
+    const newApplication = {
+        id: applications.length + 1,
+        company,
+        position,
+        status,
+        deadline
     };
 
-    applications.push(newApp);
-
-    res.status(201).json({
-        status: "success",
-        message: "Lamaran berhasil ditambahkan",
-        data: newApp
-    });
+    applications.push(newApplication);
+    res.status(201).json(newApplication);
 };
 
 // PUT update seluruh data
 const updateApplication = (req, res) => {
     const id = parseInt(req.params.id, 10);
     const index = applications.findIndex((item) => item.id === id);
+    const application = applications[index];
 
-    if (index !== -1) {
-        const { company, position, status, deadline } = req.body;
+    const { company, position, status, deadline } = req.body;
 
-        applications[index] = {
-            ...applications[index],
-            company: company ?? applications[index].company,
-            position: position ?? applications[index].position,
-            status: status ?? applications[index].status,
-            deadline: deadline ?? applications[index].deadline
-        };
+    if (application) {
+        application.company = company;
+        application.position = position;
+        application.status = status;
+        application.deadline = deadline;
 
-        res.status(200).json({
-            status: "success",
-            message: `Data lamaran ID ${id} berhasil diperbarui (PUT)`,
-            data: applications[index]
-        });
+        res.json(application);
     } else {
         res.status(404).json({
-            status: "error",
-            message: "daftar lamaran tidak ditemukan"
+            error: "Application Not Found"
         });
     }
 };
@@ -102,19 +83,19 @@ const updateApplication = (req, res) => {
 const patchApplication = (req, res) => {
     const id = parseInt(req.params.id, 10);
     const appItem = applications.find((item) => item.id === id);
+    
+    const { company, position, status, deadline } = req.body;
 
     if (appItem) {
-        Object.assign(appItem, req.body);
+        if (company) appItem.company = company;
+        if (position) appItem.position = position;
+        if (status) appItem.status = status;
+        if (deadline) appItem.deadline = deadline;
 
-        res.status(200).json({
-            status: "success",
-            message: `Status/data lamaran ID ${id} berhasil diperbarui (PATCH)`,
-            data: appItem
-        });
+        res.json(appItem);
     } else {
         res.status(404).json({
-            status: "error",
-            message: "daftar lamaran tidak ditemukan"
+            error: "Application Not Found"
         });
     }
 };
@@ -128,13 +109,11 @@ const deleteApplication = (req, res) => {
         applications.splice(index, 1);
 
         res.status(200).json({
-            status: "success",
-            message: `Lamaran ID ${id} berhasil dihapus`
+            message: "Application deleted successfully"
         });
     } else {
         res.status(404).json({
-            status: "error",
-            message: "daftar lamaran tidak ditemukan"
+            error: "Application Not Found"
         });
     }
 };
