@@ -3,18 +3,31 @@ const router = express.Router();
 
 const { 
     getAllPositions,
-    getPositionById, 
-    postAllPosition, 
-    putPositionById, 
+    getPositionById,
+    postAllPosition,
+    putPositionById,
     delPositionById,
-    patchPositionById 
+    //patchPositionById,
 } = require("../controllers/positions.controller");
 
+// const checkPositions = require("../middlewares/checkPositions")
+
+const validatePosition = require("../middlewares/validation/position.validate")
+
+//GET
 router.get("/", getAllPositions);
 router.get("/:id", getPositionById);
-router.post("/", postAllPosition);
-router.put("/:id", putPositionById);
-router.delete("/:id", delPositionById),
-router.patch("/:id", patchPositionById)
+
+//POST
+router.post("/", validatePosition, postAllPosition);
+
+//PUT
+router.put("/:id", validatePosition, putPositionById);
+
+//DELETE
+router.delete("/:id", delPositionById);
+
+// //PATCH
+// router.patch("/:id", patchPositionById)
 
 module.exports = router;

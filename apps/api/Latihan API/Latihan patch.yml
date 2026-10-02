@@ -1,9 +1,10 @@
 info:
   name: Latihan patch
   type: http
+  seq: 1
 
 http:
-  method: GET
+  method: PATCH
   url: http://localhost:3000/api/jobs/
   auth: inherit
 

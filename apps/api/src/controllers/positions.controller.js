@@ -21,20 +21,20 @@ const getAllPositions = (req, res) => {
 };
 
 // GET position berdasarkan id
-const getPositionById = (req, res) => {
+const getPositionById = (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     const position = positions.find(
         (item) => item.id === id
     );
 
-    if (position) {
-        res.json(position);
-    } else {
-        res.status(404).json({
-            error: "Position Not Found"
-        });
+    if (!position) {
+        const error = new Error("Position Not Found");
+        error.status = 404;
+
+        return next(error);
     }
-};
+        res.json(position);
+    };
 
 // POST Position
 const postAllPosition = (req, res) => {
@@ -73,25 +73,25 @@ const putPositionById = (req, res) => {
 }
 
 // PATCH Position by id
-const patchPositionById = (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const position = positions.find(
-        (item) => item.id === id
-    )
-    const {name, industry, location, InternStatus} = req.body;
+// const patchPositionById = (req, res) => {
+//     const id = parseInt(req.params.id, 10);
+//     const position = positions.find(
+//         (item) => item.id === id
+//     )
+//     const {name, industry, location, InternStatus} = req.body;
 
-    if (position) {
-        if (name) position.name = name;
-        if (industry) position.industry = industry;
-        if (location) position.location = location;
-        if (InternStatus) position.InternStatus = InternStatus;
-        res.json(position);
-    } else {
-        res.status(404).json({
-            error: "Position Not Found"
-        });
-    }
-}
+//     if (position) {
+//         if (name) position.name = name;
+//         if (industry) position.industry = industry;
+//         if (location) position.location = location;
+//         if (InternStatus) position.InternStatus = InternStatus;
+//         res.json(position);
+//     } else {
+//         res.status(404).json({
+//             error: "Position Not Found"
+//         });
+//     }
+// }
 
 // DELETE Position by id
 const delPositionById = (req, res) => {
@@ -117,6 +117,6 @@ module.exports = {
     getPositionById,
     postAllPosition,
     putPositionById,
-    patchPositionById,
+    //patchPositionById,
     delPositionById
 };

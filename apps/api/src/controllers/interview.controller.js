@@ -81,27 +81,27 @@ const updateInterview = (req, res) => {
 };
 
 //PATCH update sebagian data
-const patchInterview = (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const interviewItem = interviews.find((item) => item.id === id);
+// const patchInterview = (req, res) => {
+//     const id = parseInt(req.params.id, 10);
+//     const interviewItem = interviews.find((item) => item.id === id);
 
-    const { application_id, company, position, interview_date, type, status } = req.body;
+//     const { application_id, company, position, interview_date, type, status } = req.body;
 
-    if (interviewItem) {
-        if (application_id) interviewItem.application_id = application_id;
-        if (company) interviewItem.company = company;
-        if (position) interviewItem.position = position;
-        if (interview_date) interviewItem.interview_date = interview_date;
-        if (type) interviewItem.type = type;
-        if (status) interviewItem.status = status;
+//     if (interviewItem) {
+//         if (application_id) interviewItem.application_id = application_id;
+//         if (company) interviewItem.company = company;
+//         if (position) interviewItem.position = position;
+//         if (interview_date) interviewItem.interview_date = interview_date;
+//         if (type) interviewItem.type = type;
+//         if (status) interviewItem.status = status;
 
-        res.json(interviewItem);
-    } else {
-        res.status(404).json({
-            error: "Interview Not Found"
-        });
-    }
-};
+//         res.json(interviewItem);
+//     } else {
+//         res.status(404).json({
+//             error: "Interview Not Found"
+//         });
+//     }
+// };
 
 // DELETE hapus interview
 const deleteInterview = (req, res) => {
@@ -126,6 +126,5 @@ module.exports = {
     getInterviewById,
     createInterview,
     updateInterview,
-    patchInterview,
     deleteInterview
 };

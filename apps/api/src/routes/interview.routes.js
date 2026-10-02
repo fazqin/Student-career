@@ -26,7 +26,6 @@ const {
     getInterviewById,
     createInterview,
     updateInterview,
-    patchInterview,
     deleteInterview
 } = require('../controllers/interview.controller');
 
@@ -34,7 +33,6 @@ router.get('/', getAllInterviews);
 router.get('/:id', getInterviewById);
 router.post('/', createInterview);
 router.put('/:id', updateInterview);
-router.patch('/:id', patchInterview);
 router.delete('/:id', deleteInterview);
 
 module.exports = router;

@@ -5,7 +5,16 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/jobs/
+  url: http://localhost:3000/api/positions/
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Private Assistant",
+          "industry": "Administration",
+          "location": "Jakarta",
+          "InternStatus": "Paid"
+      }
   auth: inherit
 
 settings:
