@@ -1,20 +1,19 @@
 const express = require("express");
 const router = express.Router();
 
-const { getAllProfiles
+const {
+    getAllProfiles,
+    putProfileById,
 } = require("../controllers/profiles.controller");
 
+const validateProfile = require(
+    "../middlewares/validation/profile.validate"
+);
+
+// GET
 router.get("/", getAllProfiles);
 
-// router.get("/:id", (req,res) => {
-//     const profiles = ["Yanto", "Gunawan", "Kusuma"];
-
-//     const id = parseInt(req.params.id, 10);
-
-//     if (id >= 0 && id < profiles.length) {
-//         res.json({ name: profiles[id]});
-//     } else {res.status(404).json({error: "Gak nemu nih!"})
-//     }
-// });
+// PUT
+router.put("/:id", validateProfile, putProfileById);
 
 module.exports = router;
