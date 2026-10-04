@@ -29,10 +29,12 @@ const {
     deleteInterview
 } = require('../controllers/interview.controller');
 
+const { validateInterviewBody } = require('../middlewares/validation/interview.validate');
+
 router.get('/', getAllInterviews);
 router.get('/:id', getInterviewById);
-router.post('/', createInterview);
-router.put('/:id', updateInterview);
+router.post('/', validateInterviewBody, createInterview);
+router.put('/:id', validateInterviewBody, updateInterview);
 router.delete('/:id', deleteInterview);
 
 module.exports = router;
