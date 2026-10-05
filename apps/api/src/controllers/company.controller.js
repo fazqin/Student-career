@@ -21,26 +21,22 @@ const getAllCompanies = (req, res) => {
 };
 
 // GET company berdasarkan id
-const getCompanyById = (req, res) => {
+const getCompanyById = (req, res, next) => {
     const id = parseInt(req.params.id, 10);
+    const company = companies.find((item) => item.id === id);
 
-    const company = companies.find(
-        (item) => item.id === id
-    );
-
-    if (company) {
-        res.json(company);
-    } else {
-        res.status(404).json({
-            error: "Company Not Found"
-        });
+    if (!company) {
+        const error = new Error("Company Not Found");
+        error.status = 404;
+        return next(error);
     }
+
+    res.json(company);
 };
 
 // POST Company
 const postAllCompany = (req, res) => {
     const { name, industry, location, website } = req.body;
-
     const newCompany = {
         id: companies.length + 1,
         name,
@@ -50,53 +46,45 @@ const postAllCompany = (req, res) => {
     };
 
     companies.push(newCompany);
-
     res.status(201).json(newCompany);
 };
 
 // PUT Company berdasarkan id
-const putCompanyById = (req, res) => {
+const putCompanyById = (req, res, next) => {
     const id = parseInt(req.params.id, 10);
+    const company = companies.find((item) => item.id === id);
 
-    const company = companies.find(
-        (item) => item.id === id
-    );
+    if (!company) {
+        const error = new Error("Company Not Found");
+        error.status = 404;
+        return next(error);
+    }
 
     const { name, industry, location, website } = req.body;
 
-    if (company) {
-        company.name = name;
-        company.industry = industry;
-        company.location = location;
-        company.website = website;
+    company.name = name;
+    company.industry = industry;
+    company.location = location;
+    company.website = website;
 
-        res.json(company);
-    } else {
-        res.status(404).json({
-            error: "Company Not Found"
-        });
-    }
+    res.json(company);
 };
 
 // DELETE Company berdasarkan id
-const delCompanyById = (req, res) => {
+const delCompanyById = (req, res, next) => {
     const id = parseInt(req.params.id, 10);
+    const companyIndex = companies.findIndex((item) => item.id === id);
 
-    const companyIndex = companies.findIndex(
-        (item) => item.id === id
-    );
-
-    if (companyIndex !== -1) {
-        companies.splice(companyIndex, 1);
-
-        res.status(200).json({
-            message: "Company deleted successfully"
-        });
-    } else {
-        res.status(404).json({
-            error: "Company Not Found"
-        });
+    if (companyIndex === -1) {
+        const error = new Error("Company Not Found");
+        error.status = 404;
+        return next(error);
     }
+
+    companies.splice(companyIndex, 1);
+    res.status(200).json({
+        message: "Company deleted successfully"
+    });
 };
 
 module.exports = {
