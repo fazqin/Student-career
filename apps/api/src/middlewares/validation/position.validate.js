@@ -34,9 +34,9 @@ const validatePosition = (req, res, next) => {
         })
     }
 
-    if (InternStatus !== "Paid" && InternStatus !== "Unpaid") {
+    if (status !== "Paid" && status !== "Unpaid") {
     return res.status(400).json({
-        error: "InternStatus must be Paid or Unpaid"
+        error: "status must be Paid or Unpaid"
     });
 }
     next();

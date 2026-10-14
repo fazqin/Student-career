@@ -14,7 +14,7 @@ const interviews = [
         company: "Tech Corp",
         position: "Backend Developer",
         interview_date: "2026-04-06T14:00:00Z",
-        type: "Offline (User Interview)",
+        Inttype: "Offline (User Interview)",
         status: "Completed"
     }
 ];

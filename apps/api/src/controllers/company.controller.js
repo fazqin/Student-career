@@ -2,15 +2,13 @@ const companies = [
     {
         id: 1,
         name: "Telkom Indonesia",
-        industry: "Telecommunication",
-        location: "Bandung",
+        description:"Electricity company",
         website: "https://telkom.co.id"
     },
     {
         id: 2,
         name: "Tokopedia",
-        industry: "Technology",
-        location: "Jakarta",
+        description: "E-commerce company",
         website: "https://tokopedia.com"
     }
 ];
@@ -36,12 +34,11 @@ const getCompanyById = (req, res, next) => {
 
 // POST Company
 const postAllCompany = (req, res) => {
-    const { name, industry, location, website } = req.body;
+    const { name, description, website } = req.body;
     const newCompany = {
         id: companies.length + 1,
         name,
-        industry,
-        location,
+        description,
         website
     };
 
@@ -60,11 +57,10 @@ const putCompanyById = (req, res, next) => {
         return next(error);
     }
 
-    const { name, industry, location, website } = req.body;
+    const { name, description, website } = req.body;
 
     company.name = name;
-    company.industry = industry;
-    company.location = location;
+    company.description = description;
     company.website = website;
 
     res.json(company);

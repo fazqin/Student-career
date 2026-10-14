@@ -1,11 +1,11 @@
 import {
-  applications as _applications,
-  companies as _companies,
-  interviews as _interviews,
-  positions as _positions,
-  profile as _profile,
-} from "../data/mockData";
+  getPositionById,
+  isSavedPosition,
+  toggleSavedPosition,
+  createApplication,
+} from "@/services/api";
 
+const API_BASE_URL = "http://localhost:3000/api";
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 let state = {
@@ -51,47 +51,132 @@ export async function getCompanies() {
   return clone(state.companies);
 }
 
+
 export async function getPositions({ query = "", type = "All" } = {}) {
-  await delay();
-  const q = query.trim().toLowerCase();
-  return clone(
-    state.positions.filter((p) => {
-      const matchesQuery =
-        !q ||
-        p.title.toLowerCase().includes(q) ||
-        p.tags.join(" ").toLowerCase().includes(q);
-      const matchesType = type === "All" ? true : p.type === type;
-      return matchesQuery && matchesType;
-    })
-  );
+  const response = await fetch(`${API_BASE_URL}/positions`);
+
+  if (!response.ok) {
+    throw new Error("Gagal mengambil data positions");
+  }
+
+  const result = await response.json();
+  const rows = result.data ?? result;
+
+  const positions = rows.map((p) => ({
+    id: String(p.id),
+    companyId: String(p.company_id),
+    title: p.title,
+    location: p.location,
+    deadline: p.deadline,
+    type: p.work_type,
+    team: p.industry,
+    salaryRange: p.salary_range,
+    tags: [p.industry, p.work_type, p.intern_status].filter(Boolean),
+    internStatus: p.intern_status,
+    description: p.description,
+    company: {
+      id: String(p.company_id),
+      name: p.company_name,
+      industry: p.industry,
+      size: p.company_size,
+      brandColor: p.brand_color,
+      website: p.website,
+    },
+  }));
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  return positions.filter((p) => {
+    const matchesQuery =
+      !normalizedQuery ||
+      p.title.toLowerCase().includes(normalizedQuery) ||
+      p.tags.join(" ").toLowerCase().includes(normalizedQuery) ||
+      p.company.name.toLowerCase().includes(normalizedQuery);
+
+    const matchesType =
+      type === "All" ||
+      p.type.toLowerCase() === type.toLowerCase();
+
+    return matchesQuery && matchesType;
+  });
 }
 
 export async function getPositionById(positionId) {
-  await delay();
-  const found = state.positions.find((p) => p.id === positionId);
-  if (!found) throw new Error("Position not found");
-  return clone(found);
+  const response = await fetch(
+    `${API_BASE_URL}/positions/${encodeURIComponent(positionId)}`
+  );
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Position tidak ditemukan");
+    }
+
+    throw new Error("Gagal mengambil detail position");
+  }
+
+  const result = await response.json();
+  const p = result.data ?? result;
+
+  return {
+    id: String(p.id),
+    companyId: String(p.company_id),
+    title: p.title,
+    location: p.location,
+    deadline: p.deadline,
+    type: p.work_type,
+    team: p.industry,
+    salaryRange: p.salary_range,
+    tags: [p.industry, p.work_type, p.intern_status].filter(Boolean),
+    internStatus: p.intern_status,
+    description: p.description,
+    company: {
+      id: String(p.company_id),
+      name: p.company_name,
+      industry: p.industry,
+      size: p.company_size,
+      brandColor: p.brand_color,
+      website: p.website,
+    },
+  };
 }
+
 
 export async function getApplications() {
   await delay();
   return clone(state.applications);
 }
 
+
 export async function createApplication(payload) {
-  await delay();
-  const newItem = {
-    id: `a_${Math.random().toString(16).slice(2)}`,
-    createdAt: nowIso().slice(0, 10),
-    updatedAt: nowIso().slice(0, 10),
-    stage: "Wishlist",
-    priority: "Medium",
-    notes: "",
-    ...payload,
-  };
-  state.applications = [newItem, ...state.applications];
-  return clone(newItem);
+  const response = await fetch(
+    "http://localhost:3000/api/applications",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: payload.user_id,
+        position_id: Number(payload.position_id),
+        status: payload.status ?? "Applied",
+        priority: payload.priority ?? "Medium",
+        deadline: payload.deadline ?? null,
+        notes: payload.notes ?? null,
+      }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ?? "Gagal menambahkan application"
+    );
+  }
+
+  return result.data;
 }
+
 
 export async function updateApplication(applicationId, payload) {
   await delay();
