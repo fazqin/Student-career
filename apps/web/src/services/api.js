@@ -158,6 +158,9 @@ export async function getApplications() {
   id: String(a.id),
   userId: a.user_id,
   positionId: String(a.position_id),
+  // `status` is the raw DB value (e.g. "Applied", "Withdrawn", "Rejected").
+  // `stage` is kept as an alias for backward compatibility with existing components.
+  status: a.status,
   stage: a.status,
   priority: a.priority,
   createdAt: a.created_at,
@@ -210,6 +213,7 @@ export async function createApplication(payload) {
 }
 
 
+
 export async function updateApplication(applicationId, payload) {
   const response = await fetch(
     `${API_BASE_URL}/applications/${applicationId}`,
@@ -219,9 +223,18 @@ export async function updateApplication(applicationId, payload) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        priority: payload.priority,
-        deadline: payload.deadline || null,
-        notes: payload.notes ?? null,
+        ...(payload.priority !== undefined && {
+          priority: payload.priority,
+        }),
+        ...(payload.deadline !== undefined && {
+          deadline: payload.deadline || null,
+        }),
+        ...(payload.notes !== undefined && {
+          notes: payload.notes,
+        }),
+        ...(payload.status !== undefined && {
+          status: payload.status,
+        }),
       }),
     }
   );
@@ -236,6 +249,7 @@ export async function updateApplication(applicationId, payload) {
 
   return result.data;
 }
+
 
 export async function updateApplicationStatus(applicationId, stage) {
   return updateApplication(applicationId, { stage });

@@ -3,18 +3,41 @@ import { cn } from "@/utils/cn";
 import { formatCompactDate } from "@/utils/format";
 
 
-export function ApplicationTable({ applications, onEdit }: { applications: any[]; onEdit?: (app: any) => void }) {
+export function ApplicationTable({ 
+  applications, 
+  onEdit
+  }: { 
+  applications: any[]; 
+  onEdit?: (app: any) => void; 
+  }) {
   const priorityOrder: Record<string, number> = {
   High: 1,
   Medium: 2,
   Low: 3,
 };
 
-const sortedApplications = [...(applications ?? [])].sort(
+const activeApplications = (applications ?? []).filter(
+  (a) => a.status !== "Withdrawn"
+);
+
+const sortedApplications = [...activeApplications].sort(
   (a, b) =>
     (priorityOrder[a.priority] ?? 99) -
     (priorityOrder[b.priority] ?? 99)
 );
+
+  if (sortedApplications.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="text-2xl">📋</div>
+          <div className="mt-3 text-sm font-medium text-slate-700">No active applications</div>
+          <div className="mt-1 text-xs text-slate-500">Applications you withdraw will appear in the History tab.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -49,7 +72,9 @@ const sortedApplications = [...(applications ?? [])].sort(
                     <div className="mt-1 text-[11px] text-slate-500">{pos?.team ?? "Team"}</div>
                   </td>
                   <td className="px-5 py-4">
-                    <Badge variant="stage">{a.stage}</Badge>
+                    <Badge variant="stage">
+                      {a.status ?? a.stage ?? "Unknown"}
+                    </Badge>
                   </td>
                   <td className="px-5 py-4">
                     <span
@@ -77,6 +102,7 @@ const sortedApplications = [...(applications ?? [])].sort(
                     >
                       Edit
                     </button>
+                    
                   </td>
                 </tr>
               );

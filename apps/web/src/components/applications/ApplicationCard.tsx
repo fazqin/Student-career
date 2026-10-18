@@ -1,7 +1,15 @@
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/utils/cn";
 
-export function ApplicationCard({ app, onEdit }: { app: any; onEdit?: (app: any) => void }) {
+export function ApplicationCard({ 
+  app, 
+  onEdit, 
+  onWithdraw 
+  }: { 
+    app: any; 
+    onEdit?: (app: any) => void; 
+    onWithdraw?: (app: any) => void 
+  }) {
   const pos = app.position;
   const company = app.company;
 
