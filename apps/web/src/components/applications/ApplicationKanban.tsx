@@ -1,9 +1,22 @@
 import { applicationStages } from "@/data/mockData";
 import { ApplicationCard } from "@/components/applications/ApplicationCard";
 
-export function ApplicationKanban({ applications }: { applications: any[] }) {
-  const byStage = (stage: string) => (applications ?? []).filter((a) => a.stage === stage);
+export function ApplicationKanban({ applications, onEdit }: { applications: any[]; onEdit?: (app: any) => void }) {
+  
+  const priorityOrder: Record<string, number> = {
+  High: 1,
+  Medium: 2,
+  Low: 3,
+};
 
+const byStage = (stage: string) =>
+  (applications ?? [])
+    .filter((a) => a.stage === stage)
+    .sort(
+      (a, b) =>
+        (priorityOrder[a.priority] ?? 99) -
+        (priorityOrder[b.priority] ?? 99)
+    );
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm">
       <div className="flex min-w-0 gap-3 overflow-x-auto p-5">
@@ -18,7 +31,7 @@ export function ApplicationKanban({ applications }: { applications: any[] }) {
             </div>
             <div className="space-y-2 px-3 pb-3">
               {byStage(stage).map((a) => (
-                <ApplicationCard key={a.id} app={a} />
+                <ApplicationCard key={a.id} app={a} onEdit={onEdit} />
               ))}
               {byStage(stage).length === 0 && (
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-400">

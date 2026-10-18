@@ -16,6 +16,7 @@ import {
   isSavedPosition,
   toggleSavedPosition,
   createApplication,
+  getApplications,
 } from "@/services/api";
 
 import { Button } from "@/components/ui/Button";
@@ -31,6 +32,8 @@ export default function JobDetail() {
   const [adding, setAdding] = useState(false);
   const [applicationMessage, setApplicationMessage] = useState("");
   const [applicationError, setApplicationError] = useState("");
+  const [applicationPriority, setApplicationPriority] = useState("Medium");
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -46,6 +49,15 @@ export default function JobDetail() {
 
         setPosition(p);
         setSaved(s);
+        const applications = await getApplications();
+
+        const applied = applications.some(
+          (a: any) =>
+            String(a.positionId) === String(id) &&
+            a.userId === "8f24333c-16ba-496a-9090-7f0438e498f3"
+        );
+
+setAlreadyApplied(applied);
       } catch (error) {
         console.error("Failed to load position:", error);
       }
@@ -56,6 +68,8 @@ export default function JobDetail() {
     return () => {
       alive = false;
     };
+
+    
   }, [id]);
 
   // Gunakan data perusahaan dari API terlebih dahulu.
@@ -80,36 +94,36 @@ export default function JobDetail() {
   }
 
   async function onAddToApplications() {
-    if (!position || adding) return;
+  if (!position || adding || alreadyApplied) return;
 
-    setAdding(true);
-    setApplicationMessage("");
-    setApplicationError("");
+  setAdding(true);
+  setApplicationMessage("");
+  setApplicationError("");
 
-    try {
-      const application = await createApplication({
-        user_id: "8f24333c-16ba-496a-9090-7f0438e498f3",
-        position_id: position.id,
-        status: "Applied",
-        priority: "Medium",
-        deadline: position.deadline ?? null,
-        notes: null,
-      });
+  try {
+    await createApplication({
+      user_id: "8f24333c-16ba-496a-9090-7f0438e498f3",
+      position_id: position.id,
+      status: "Applied",
+      priority: applicationPriority,
+      deadline: position.deadline ?? null,
+      notes: null,
+    });
 
-      setApplicationMessage(
-        `Lamaran berhasil ditambahkan. ID: ${application.id}`
-      );
-    } catch (error) {
-      setApplicationError(
-        error instanceof Error
-          ? error.message
-          : "Gagal menambahkan lamaran."
-      );
-    } finally {
-      setAdding(false);
-    }
+    setAlreadyApplied(true);
+    window.alert("Position has been applied");
+    setApplicationMessage("Position has been applied");
+  } catch (error) {
+    setApplicationError(
+      error instanceof Error
+        ? error.message
+        : "Failed to apply for this position."
+    );
+  } finally {
+    setAdding(false);
   }
-
+}
+  
   if (!position) {
     return (
       <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-white/60">
@@ -222,13 +236,29 @@ export default function JobDetail() {
           </div>
 
           <div className="flex flex-col gap-3 lg:w-[280px]">
+            <label className="text-sm text-slate-700">
+              Priority
+              <select
+                value={applicationPriority}
+                onChange={(e) => setApplicationPriority(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3"
+              >
+                {["Low", "Medium", "High"].map((priority) => (
+                  <option key={priority} value={priority}>{priority}</option>
+                ))}
+              </select>
+            </label>
             <Button
               variant="primary"
               size="lg"
               onClick={onAddToApplications}
-              disabled={adding}
+              disabled={adding || alreadyApplied}
             >
-              {adding ? "Adding..." : "Add to Applications"}
+              {adding
+                ? "Adding..."
+                : alreadyApplied
+                  ? "Already Applied"
+                  : "Add to Applications"}
             </Button>
 
             {applicationMessage && (

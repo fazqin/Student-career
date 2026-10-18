@@ -1,9 +1,11 @@
 import {
-  getPositionById,
-  isSavedPosition,
-  toggleSavedPosition,
-  createApplication,
-} from "@/services/api";
+  profile as _profile,
+  companies as _companies,
+  positions as _positions,
+  applications as _applications,
+  interviews as _interviews,
+} from "@/data/mockData";
+
 
 const API_BASE_URL = "http://localhost:3000/api";
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
@@ -141,10 +143,40 @@ export async function getPositionById(positionId) {
 }
 
 
+
 export async function getApplications() {
-  await delay();
-  return clone(state.applications);
-}
+  const response = await fetch(`${API_BASE_URL}/applications`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch applications");
+  }
+
+  const result = await response.json();
+  const data = result.data ?? result;
+
+  return data.map((a) => ({
+  id: String(a.id),
+  userId: a.user_id,
+  positionId: String(a.position_id),
+  stage: a.status,
+  priority: a.priority,
+  createdAt: a.created_at,
+  updatedAt: a.updated_at,
+  appliedDate: a.applied_date,
+  deadline: a.application_deadline ?? a.position_deadline,
+  notes: a.notes,
+
+  position: {
+    id: String(a.position_id),
+    title: a.position_title,
+    team: a.company_industry,
+    deadline: a.position_deadline,
+  },
+  company: {
+    name: a.company_name,
+    industry: a.company_industry,
+  },
+}))};
 
 
 export async function createApplication(payload) {
@@ -158,14 +190,14 @@ export async function createApplication(payload) {
       body: JSON.stringify({
         user_id: payload.user_id,
         position_id: Number(payload.position_id),
-        status: payload.status ?? "Applied",
-        priority: payload.priority ?? "Medium",
-        deadline: payload.deadline ?? null,
-        notes: payload.notes ?? null,
+        status: payload.status || "Applied",
+        priority: payload.priority || "Medium",
+        deadline: payload.deadline || null,
+        notes: payload.notes || null,
       }),
     }
   );
-
+    
   const result = await response.json();
 
   if (!response.ok) {
@@ -179,11 +211,30 @@ export async function createApplication(payload) {
 
 
 export async function updateApplication(applicationId, payload) {
-  await delay();
-  state.applications = state.applications.map((a) =>
-    a.id === applicationId ? { ...a, ...payload, updatedAt: nowIso().slice(0, 10) } : a
+  const response = await fetch(
+    `${API_BASE_URL}/applications/${applicationId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        priority: payload.priority,
+        deadline: payload.deadline || null,
+        notes: payload.notes ?? null,
+      }),
+    }
   );
-  return clone(state.applications.find((a) => a.id === applicationId));
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Gagal memperbarui application"
+    );
+  }
+
+  return result.data;
 }
 
 export async function updateApplicationStatus(applicationId, stage) {

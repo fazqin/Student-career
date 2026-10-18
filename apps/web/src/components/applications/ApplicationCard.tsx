@@ -1,10 +1,9 @@
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/utils/cn";
-import { getPosition, getPositionCompany } from "@/utils/join";
 
-export function ApplicationCard({ app }: { app: any }) {
-  const pos = getPosition(app.positionId);
-  const company = pos ? getPositionCompany(pos.id) : undefined;
+export function ApplicationCard({ app, onEdit }: { app: any; onEdit?: (app: any) => void }) {
+  const pos = app.position;
+  const company = app.company;
 
   const pri = app.priority as string;
   const priStyle =
@@ -26,6 +25,16 @@ export function ApplicationCard({ app }: { app: any }) {
         </Badge>
       </div>
       {app.notes && <div className="mt-2 line-clamp-2 text-[11px] text-slate-500">{app.notes}</div>}
+      <button
+        type="button"
+        
+        onClick={() => {
+          console.log("Edit diklik:", app);
+          onEdit?.(app)}}
+        className="mt-3 text-xs font-medium text-teal-700 hover:text-teal-900"
+      >
+        Edit
+      </button>
     </div>
   );
 }

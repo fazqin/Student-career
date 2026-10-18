@@ -1,24 +1,4 @@
-// const applications = [
-//     { 
-//         id: 1, 
-//         company_id: "PT OTW KAYA", 
-//         position: "QA", 
-//         status: "Applied"
-//     },
-//     { 
-//         id: 2, 
-//         user_id:1,
-//         company_id: "Tech Corp", 
-//         position: "Backend Developer", 
-//         status: "Interview"
-//     },
-//     {
-//         id: 3,
-//         company: "Creative Agency",
-//         position: "UI/UX Designer",
-//         status: "Rejected"
-//     }
-// ];
+
 const pool = require("../config/db");
 
 // GET semua
@@ -27,18 +7,25 @@ const getAllApplications = async (req, res) => {
     try {
         const query = `
             SELECT
-                a.id,
-                a.user_id,
-                a.position_id,
-                a.status,
-                a.priority,
-                a.applied_date,
-                a.deadline,
-                a.notes,
-                a.created_at,
-                a.updated_at
-            FROM applications AS a
-            ORDER BY a.id ASC;
+            a.id,
+            a.user_id,
+            a.position_id,
+            a.status,
+            a.priority,
+            a.applied_date,
+            a.deadline AS application_deadline,
+            a.notes,
+            a.created_at,
+            a.updated_at,
+            p.title AS position_title,
+            c.industry,
+            p.deadline AS position_deadline,
+            c.name AS company_name,
+            c.industry AS company_industry
+        FROM applications a
+        JOIN positions p ON p.id = a.position_id
+        JOIN companies c ON c.id = p.company_id
+        ORDER BY a.id ASC;
         `;
 
         const result = await pool.query(query);
