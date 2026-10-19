@@ -132,15 +132,7 @@ export default function AdminLogin() {
         <div className="grid w-full gap-12 lg:grid-cols-12 lg:items-center mt-20 lg:mt-0">
           {/* Left Column: Logo & Welcome Text */}
           <div data-ct-dark className="lg:col-span-5 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <Logo className="scale-110 origin-left" />
-              <Badge
-                variant="warning"
-                className="border-amber-400/40 bg-amber-500/10 text-amber-300 font-semibold tracking-wider text-[10px] uppercase"
-              >
-                Staff Portal
-              </Badge>
-            </div>
+            <Logo className="scale-110 origin-left" />
             <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               Welcome back, Staff.
             </h1>
@@ -213,7 +205,7 @@ export default function AdminLogin() {
                       }}
                       onBlur={() => handleBlur("email")}
                       disabled={loading}
-                      placeholder="admin@careertrack.com"
+                      placeholder="email@careertrack.com"
                       autoComplete="email"
                       className={`pl-9.5 text-slate-900 ${
                         errors.email && touched.email
