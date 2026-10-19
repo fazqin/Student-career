@@ -27,8 +27,8 @@ export function AdminTopbar() {
   const meta = useMemo(() => {
     return (
       titles[location.pathname] ?? {
-        title: "Staff Dashboard",
-        subtitle: "Staff Operations & Command Center",
+        title: "Admin Dashboard",
+        subtitle: "Admin Operations & Command Center",
       }
     );
   }, [location.pathname]);
@@ -53,7 +53,7 @@ export function AdminTopbar() {
               variant="warning"
               className="border-amber-400/40 bg-amber-500/10 text-amber-800 text-[10px] font-bold uppercase"
             >
-              Staff
+              Admin
             </Badge>
           </div>
           <div className="truncate text-xs text-slate-500">{meta.subtitle}</div>
@@ -64,7 +64,7 @@ export function AdminTopbar() {
         <button
           type="button"
           onClick={handleLogout}
-          title="Sign out from Staff session"
+          title="Sign out from Admin session"
           className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
         >
           <LogOut className="h-3.5 w-3.5" />

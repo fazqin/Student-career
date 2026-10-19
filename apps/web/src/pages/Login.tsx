@@ -112,14 +112,14 @@ export default function Login() {
                   </button>
                 </div>
 
-                {/* Staff Login Link */}
+                {/* Admin Login Link */}
                 <div className="pt-3 border-t border-teal-700/50 text-center">
                   <Link
                     to="/admin/login"
                     className="inline-flex items-center gap-1.5 text-xs text-teal-200/80 hover:text-white hover:underline transition"
                   >
                     <Shield className="h-3.5 w-3.5 text-teal-300" />
-                    <span>Staff Login</span>
+                    <span>Admin Login</span>
                   </Link>
                 </div>
               </form>

@@ -267,7 +267,7 @@ export async function adminLogin(payload: AdminLoginPayload): Promise<AdminAuthR
       return authData;
     } else if (response.status === 401 || response.status === 400) {
       const errData = await response.json().catch(() => null);
-      throw new Error(errData?.message || "Invalid staff email or password.");
+      throw new Error(errData?.message || "Invalid admin email or password.");
     }
   } catch (err) {
     // If it's explicitly a 400/401 credential error from backend, bubble up
@@ -289,7 +289,7 @@ export async function adminLogin(payload: AdminLoginPayload): Promise<AdminAuthR
 
   if (!isValidAdmin) {
     throw new Error(
-      "Invalid staff credentials. Use email: admin@careertrack.com and password: admin123"
+      "Invalid admin credentials. Use email: admin@careertrack.com and password: admin123"
     );
   }
 

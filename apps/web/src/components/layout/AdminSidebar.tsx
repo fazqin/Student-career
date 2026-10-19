@@ -30,14 +30,14 @@ export function AdminSidebar() {
             variant="warning"
             className="border-amber-400/40 bg-amber-500/10 text-amber-800 text-[10px] font-bold uppercase"
           >
-            Staff
+            Admin
           </Badge>
         </div>
 
         {/* Navigation Items */}
         <nav className="mt-4 space-y-1 flex-1">
           <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Staff Management
+            Admin Management
           </div>
           {adminNavItems.map((item) => (
             <NavLink
@@ -58,9 +58,9 @@ export function AdminSidebar() {
           ))}
         </nav>
 
-        {/* Footer Area: Staff User & Logout Only */}
+        {/* Footer Area: Admin User & Logout Only */}
         <div className="mt-auto space-y-2 pt-4 border-t border-slate-100">
-          {/* Staff User Card */}
+          {/* Admin User Card */}
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgb(var(--hero-bg))] text-white font-bold text-xs shrink-0">
@@ -68,7 +68,7 @@ export function AdminSidebar() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-xs font-semibold text-slate-800">
-                  {adminUser?.name || "Staff Administrator"}
+                  {adminUser?.name || "Administrator"}
                 </div>
                 <div className="truncate text-[11px] text-slate-500">
                   {adminUser?.email || "admin@careertrack.com"}

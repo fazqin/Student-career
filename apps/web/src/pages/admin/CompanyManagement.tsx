@@ -184,7 +184,7 @@ export default function CompanyManagement() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Staff Directory
+                Admin Directory
               </span>
               <Badge variant="info" className="text-[10px] font-semibold">
                 {companies.length} Registered Partners

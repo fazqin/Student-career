@@ -101,7 +101,7 @@ export default function AdminLogin() {
       const message =
         err instanceof Error
           ? err.message
-          : "An error occurred while signing in to the staff portal. Please try again.";
+          : "An error occurred while signing in to the admin portal. Please try again.";
       setErrorMessage(message);
     } finally {
       setLoading(false);
@@ -134,7 +134,7 @@ export default function AdminLogin() {
           <div data-ct-dark className="lg:col-span-5 space-y-4">
             <Logo className="scale-110 origin-left" />
             <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Welcome back, Staff.
+              Welcome back, Admin.
             </h1>
             <p className="max-w-md text-pretty text-base leading-relaxed text-slate-200/90">
               Sign in to your administration dashboard. Manage partner companies, job positions,
@@ -148,14 +148,14 @@ export default function AdminLogin() {
               <div className="mb-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold tracking-tight text-white">
-                    Sign in as Staff
+                    Sign in as Admin
                   </h2>
                   <Badge variant="warning" className="text-[10px] font-semibold">
-                    Staff
+                    Admin
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-teal-100/75">
-                  Enter your staff email and password credentials.
+                  Enter your admin email and password credentials.
                 </p>
               </div>
 
@@ -311,7 +311,7 @@ export default function AdminLogin() {
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2">
-                      Sign in to Staff Portal
+                      Sign in to Admin Portal
                       <ArrowRight className="h-4 w-4" />
                     </span>
                   )}

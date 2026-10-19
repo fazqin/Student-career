@@ -8,7 +8,7 @@ export default function PositionManagement() {
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Staff Module
+            Admin Module
           </span>
           <Badge variant="warning" className="text-[10px] font-semibold">
             Coming Soon
@@ -35,7 +35,7 @@ export default function PositionManagement() {
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-500">
           <Clock className="h-3.5 w-3.5 text-amber-500" />
-          <span>Staff Workspace Placeholder</span>
+          <span>Admin Workspace Placeholder</span>
         </div>
       </div>
     </div>
