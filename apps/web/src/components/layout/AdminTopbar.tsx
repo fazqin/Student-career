@@ -8,15 +8,15 @@ import { adminLogout } from "@/services/adminApi";
 const titles: Record<string, { title: string; subtitle: string }> = {
   "/admin/companies": {
     title: "Company Management",
-    subtitle: "Kelola data mitra perusahaan industri & integrasi karir",
+    subtitle: "Manage partner companies & industry integration",
   },
   "/admin/positions": {
     title: "Position Management",
-    subtitle: "Kelola dan publikasikan lowongan kerja atau magang",
+    subtitle: "Manage and publish career & internship opportunities",
   },
   "/admin/applications": {
     title: "Application Management",
-    subtitle: "Kelola data lamaran dan progres pipeline mahasiswa",
+    subtitle: "Track and manage student application pipelines",
   },
 };
 
@@ -28,7 +28,7 @@ export function AdminTopbar() {
     return (
       titles[location.pathname] ?? {
         title: "Staff Dashboard",
-        subtitle: "Pusat Pengelolaan Data Staff",
+        subtitle: "Staff Operations & Command Center",
       }
     );
   }, [location.pathname]);
@@ -51,7 +51,7 @@ export function AdminTopbar() {
             </h1>
             <Badge
               variant="warning"
-              className="border-amber-400/40 bg-amber-500/10 text-amber-800 text-[10px] font-bold"
+              className="border-amber-400/40 bg-amber-500/10 text-amber-800 text-[10px] font-bold uppercase"
             >
               Staff
             </Badge>
@@ -64,11 +64,11 @@ export function AdminTopbar() {
         <button
           type="button"
           onClick={handleLogout}
-          title="Keluar dari sesi Staff"
+          title="Sign out from Staff session"
           className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
         >
           <LogOut className="h-3.5 w-3.5" />
-          <span>Keluar</span>
+          <span>Sign Out</span>
         </button>
       </div>
     </div>

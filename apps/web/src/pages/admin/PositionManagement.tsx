@@ -8,17 +8,17 @@ export default function PositionManagement() {
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Modul Staff
+            Staff Module
           </span>
           <Badge variant="warning" className="text-[10px] font-semibold">
-            Segera Hadir
+            Coming Soon
           </Badge>
         </div>
         <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
           Position Management
         </h2>
         <p className="mt-1 text-xs text-slate-500 max-w-xl">
-          Kelola lowongan pekerjaan, deskripsi peran, kriteria seleksi, dan tautan perusahaan mitra.
+          Manage career openings, role descriptions, hiring criteria, and associated partner companies.
         </p>
       </div>
 
@@ -28,14 +28,14 @@ export default function PositionManagement() {
           <Briefcase className="h-7 w-7" />
         </div>
         <h3 className="mt-4 text-base font-bold text-slate-900">
-          Halaman Position Management
+          Position Management Workspace
         </h3>
         <p className="mt-1.5 text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-          Modul pengelolaan posisi lowongan kerja dan magang sedang dipersiapkan sesuai alur pengembangan. Fitur CRUD lowongan dan relasi dropdown perusahaan akan diaktifkan pada tahap selanjutnya.
+          The job and internship position management module is currently under development. CRUD operations and company dropdown linkage will be available in the next release.
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-500">
           <Clock className="h-3.5 w-3.5 text-amber-500" />
-          <span>Placeholder Menu Staff</span>
+          <span>Staff Workspace Placeholder</span>
         </div>
       </div>
     </div>

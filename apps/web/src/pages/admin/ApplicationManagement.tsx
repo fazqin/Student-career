@@ -8,17 +8,17 @@ export default function ApplicationManagement() {
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Modul Staff
+            Staff Module
           </span>
           <Badge variant="warning" className="text-[10px] font-semibold">
-            Segera Hadir
+            Coming Soon
           </Badge>
         </div>
         <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
           Application Management
         </h2>
         <p className="mt-1 text-xs text-slate-500 max-w-xl">
-          Pantau dan kelola berkas pelamar kerja, status review lamaran, dan tahapan seleksi mahasiswa.
+          Track student application dossiers, candidate pipeline review stages, and hiring outcomes.
         </p>
       </div>
 
@@ -28,14 +28,14 @@ export default function ApplicationManagement() {
           <Layers className="h-7 w-7" />
         </div>
         <h3 className="mt-4 text-base font-bold text-slate-900">
-          Halaman Application Management
+          Application Management Workspace
         </h3>
         <p className="mt-1.5 text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-          Modul pemantauan berkas lamaran mahasiswa sedang dipersiapkan. Fitur review resume, filtering tahapan seleksi, dan status lamaran akan tersedia pada rilis modul mendatang.
+          The student application tracking and screening module is currently under development. Candidate resume screening, pipeline status updates, and stage filtering will be enabled in upcoming releases.
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-500">
           <Clock className="h-3.5 w-3.5 text-teal-600" />
-          <span>Placeholder Menu Staff</span>
+          <span>Staff Workspace Placeholder</span>
         </div>
       </div>
     </div>

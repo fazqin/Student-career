@@ -15,7 +15,7 @@ export function DeleteConfirmModal({
   isOpen,
   onClose,
   onConfirm,
-  title = "Konfirmasi Hapus",
+  title = "Confirm Deletion",
   itemName,
   loading = false,
 }: DeleteConfirmModalProps) {
@@ -34,11 +34,11 @@ export function DeleteConfirmModal({
           </div>
           <div className="text-sm text-rose-900 leading-relaxed">
             <p className="font-semibold text-rose-950">
-              Hapus data perusahaan <span className="underline font-bold">"{itemName}"</span>?
+              Delete company <span className="underline font-bold">"{itemName}"</span>?
             </p>
             <p className="mt-1 text-xs text-rose-700">
-              Tindakan ini permanen dan tidak dapat dibatalkan. Semua posisi lowongan yang
-              terkait dengan perusahaan ini mungkin akan terpengaruh.
+              This action is permanent and cannot be undone. All positions and job listings associated
+              with this company may be affected.
             </p>
           </div>
         </div>
@@ -52,7 +52,7 @@ export function DeleteConfirmModal({
             disabled={loading}
             className="text-slate-600 hover:text-slate-900"
           >
-            Batal
+            Cancel
           </Button>
 
           <Button
@@ -84,12 +84,12 @@ export function DeleteConfirmModal({
                     d="M4 12a8 8 0 018-8v8H4z"
                   />
                 </svg>
-                Menghapus...
+                Deleting...
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5">
                 <Trash2 className="h-4 w-4" />
-                Hapus Perusahaan
+                Delete Company
               </span>
             )}
           </Button>

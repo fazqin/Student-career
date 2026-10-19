@@ -11,7 +11,6 @@ import {
   AlertCircle,
   CheckCircle2,
   RefreshCw,
-  Globe,
   Users,
 } from "lucide-react";
 import {
@@ -59,7 +58,7 @@ export default function CompanyManagement() {
       setError(
         err instanceof Error
           ? err.message
-          : "Gagal memuat daftar perusahaan. Silakan periksa koneksi backend atau coba kembali."
+          : "Failed to load partner companies. Please check backend connection or try again."
       );
     } finally {
       setLoading(false);
@@ -128,7 +127,7 @@ export default function CompanyManagement() {
       );
       setFeedback({
         type: "success",
-        message: `Perusahaan "${updated.name}" berhasil diperbarui.`,
+        message: `Company "${updated.name}" updated successfully.`,
       });
     } else {
       // Create
@@ -136,7 +135,7 @@ export default function CompanyManagement() {
       setCompanies((prev) => [created, ...prev]);
       setFeedback({
         type: "success",
-        message: `Perusahaan "${created.name}" berhasil ditambahkan ke direktori mitra.`,
+        message: `Company "${created.name}" added successfully to partner directory.`,
       });
     }
 
@@ -157,7 +156,7 @@ export default function CompanyManagement() {
       );
       setFeedback({
         type: "success",
-        message: `Perusahaan "${deletingCompany.name}" berhasil dihapus.`,
+        message: `Company "${deletingCompany.name}" deleted successfully.`,
       });
       setIsDeleteOpen(false);
       setDeletingCompany(null);
@@ -167,7 +166,7 @@ export default function CompanyManagement() {
         message:
           err instanceof Error
             ? err.message
-            : "Gagal menghapus perusahaan. Silakan coba kembali.",
+            : "Failed to delete company. Please try again.",
       });
     } finally {
       setDeleteLoading(false);
@@ -185,19 +184,17 @@ export default function CompanyManagement() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Direktori Mitra Staff
+                Staff Directory
               </span>
-
               <Badge variant="info" className="text-[10px] font-semibold">
-                {companies.length} Mitra Terdaftar
+                {companies.length} Registered Partners
               </Badge>
             </div>
             <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
               Company Management
             </h2>
             <p className="mt-1 text-xs text-slate-500 max-w-xl">
-              Kelola data perusahaan mitra industri, kontak resmi, dan integrasi lowongan kerja
-              mahasiswa CareerTrack.
+              Manage industry partner companies, official contact details, and career integrations for CareerTrack.
             </p>
           </div>
 
@@ -209,7 +206,7 @@ export default function CompanyManagement() {
               className="gap-2 font-semibold shadow-sm"
             >
               <Plus className="h-4 w-4" />
-              <span>Tambah Perusahaan</span>
+              <span>Add Company</span>
             </Button>
           </div>
         </div>
@@ -221,14 +218,14 @@ export default function CompanyManagement() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama perusahaan, industri, atau lokasi..."
+              placeholder="Search company name, industry, or location..."
               className="pl-9 bg-slate-50 text-xs sm:text-sm"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
-            <span className="text-xs font-medium text-slate-500">Industri:</span>
+            <span className="text-xs font-medium text-slate-500">Industry:</span>
             <select
               value={selectedIndustry}
               onChange={(e) => setSelectedIndustry(e.target.value)}
@@ -236,7 +233,7 @@ export default function CompanyManagement() {
             >
               {industryList.map((ind) => (
                 <option key={ind} value={ind}>
-                  {ind === "All" ? "Semua Industri" : ind}
+                  {ind === "All" ? "All Industries" : ind}
                 </option>
               ))}
             </select>
@@ -267,7 +264,7 @@ export default function CompanyManagement() {
             onClick={() => setFeedback(null)}
             className="text-slate-500 hover:text-slate-800 text-xs font-semibold"
           >
-            Tutup
+            Dismiss
           </button>
         </div>
       )}
@@ -278,7 +275,7 @@ export default function CompanyManagement() {
       {error && !loading && (
         <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-6 text-center text-rose-900 shadow-sm">
           <AlertCircle className="mx-auto h-8 w-8 text-rose-500 mb-2" />
-          <h3 className="text-sm font-bold text-rose-950">Gagal Mengambil Data Perusahaan</h3>
+          <h3 className="text-sm font-bold text-rose-950">Failed to Load Companies</h3>
           <p className="mt-1 text-xs text-rose-700 max-w-md mx-auto">{error}</p>
           <Button
             variant="ghost"
@@ -287,7 +284,7 @@ export default function CompanyManagement() {
             className="mt-4 gap-1.5 border-rose-300 bg-white text-rose-800 hover:bg-rose-100"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            Coba Muat Ulang
+            Retry
           </Button>
         </div>
       )}
@@ -335,11 +332,10 @@ export default function CompanyManagement() {
           {companies.length === 0 ? (
             <>
               <h3 className="mt-3 text-base font-bold text-slate-900">
-                Belum Ada Perusahaan Mitra
+                No Partner Companies Yet
               </h3>
               <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-                Mulai bangun kemitraan industri dengan mendaftarkan profil perusahaan pertama ke
-                sistem CareerTrack.
+                Start building industry partnerships by adding your first company profile to CareerTrack.
               </p>
               <Button
                 variant="secondary"
@@ -348,16 +344,16 @@ export default function CompanyManagement() {
                 className="mt-4 gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Tambah Perusahaan Pertama
+                Add First Company
               </Button>
             </>
           ) : (
             <>
               <h3 className="mt-3 text-base font-bold text-slate-900">
-                Tidak Ada Perusahaan yang Cocok
+                No Companies Match Your Search
               </h3>
               <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-                Tidak ditemukan perusahaan yang cocok dengan kata kunci atau filter yang Anda pilih.
+                No companies were found matching your keyword or selected industry filter.
               </p>
               <Button
                 variant="ghost"
@@ -368,7 +364,7 @@ export default function CompanyManagement() {
                 }}
                 className="mt-4 border-slate-300 text-slate-700"
               >
-                Reset Filter Pencarian
+                Reset Search Filter
               </Button>
             </>
           )}
@@ -385,19 +381,19 @@ export default function CompanyManagement() {
               <thead className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th scope="col" className="px-5 py-3.5">
-                    Perusahaan
+                    Company
                   </th>
                   <th scope="col" className="px-4 py-3.5">
-                    Industri & Skala
+                    Industry & Scale
                   </th>
                   <th scope="col" className="px-4 py-3.5">
-                    Lokasi Kantor
+                    Office Location
                   </th>
                   <th scope="col" className="px-4 py-3.5 hidden lg:table-cell">
-                    Deskripsi
+                    Description
                   </th>
                   <th scope="col" className="px-5 py-3.5 text-right">
-                    Aksi
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -436,7 +432,7 @@ export default function CompanyManagement() {
                               </a>
                             ) : (
                               <span className="text-[11px] text-slate-400">
-                                Tanpa website
+                                No website
                               </span>
                             )}
                           </div>
@@ -471,7 +467,7 @@ export default function CompanyManagement() {
                       {/* Description */}
                       <td className="px-4 py-4 hidden lg:table-cell">
                         <p className="line-clamp-2 text-xs text-slate-500 max-w-sm leading-relaxed">
-                          {company.description || "Tidak ada deskripsi tersedia."}
+                          {company.description || "No description provided."}
                         </p>
                       </td>
 
@@ -481,7 +477,7 @@ export default function CompanyManagement() {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(company)}
-                            title="Edit Perusahaan"
+                            title="Edit Company"
                             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-teal-700 transition"
                             aria-label={`Edit ${company.name}`}
                           >
@@ -490,9 +486,9 @@ export default function CompanyManagement() {
                           <button
                             type="button"
                             onClick={() => handleOpenDelete(company)}
-                            title="Hapus Perusahaan"
+                            title="Delete Company"
                             className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
-                            aria-label={`Hapus ${company.name}`}
+                            aria-label={`Delete ${company.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -508,8 +504,8 @@ export default function CompanyManagement() {
           {/* Table Footer Summary */}
           <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs text-slate-500">
             <div>
-              Menampilkan <span className="font-semibold text-slate-700">{filteredCompanies.length}</span> dari{" "}
-              <span className="font-semibold text-slate-700">{companies.length}</span> perusahaan
+              Showing <span className="font-semibold text-slate-700">{filteredCompanies.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{companies.length}</span> companies
             </div>
             {searchQuery && (
               <button
@@ -517,7 +513,7 @@ export default function CompanyManagement() {
                 onClick={() => setSearchQuery("")}
                 className="text-[11px] text-teal-700 hover:underline"
               >
-                Hapus pencarian
+                Clear search
               </button>
             )}
           </div>
@@ -540,7 +536,7 @@ export default function CompanyManagement() {
           setDeletingCompany(null);
         }}
         onConfirm={handleConfirmDelete}
-        itemName={deletingCompany?.name || "Perusahaan"}
+        itemName={deletingCompany?.name || "Company"}
         loading={deleteLoading}
       />
     </div>

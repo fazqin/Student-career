@@ -267,11 +267,11 @@ export async function adminLogin(payload: AdminLoginPayload): Promise<AdminAuthR
       return authData;
     } else if (response.status === 401 || response.status === 400) {
       const errData = await response.json().catch(() => null);
-      throw new Error(errData?.message || "Email atau password admin tidak valid.");
+      throw new Error(errData?.message || "Invalid staff email or password.");
     }
   } catch (err) {
     // If it's explicitly a 400/401 credential error from backend, bubble up
-    if (err instanceof Error && err.message.includes("tidak valid")) {
+    if (err instanceof Error && err.message.includes("Invalid")) {
       throw err;
     }
     // Otherwise fallback to mock contract
@@ -289,7 +289,7 @@ export async function adminLogin(payload: AdminLoginPayload): Promise<AdminAuthR
 
   if (!isValidAdmin) {
     throw new Error(
-      "Email atau password admin salah. Gunakan email: admin@careertrack.com dan password: admin123"
+      "Invalid staff credentials. Use email: admin@careertrack.com and password: admin123"
     );
   }
 
@@ -375,7 +375,7 @@ export async function getAdminCompanyById(id: string | number): Promise<Company>
 
   await delay(200);
   const found = getStoredCompanies().find((c) => String(c.id) === String(id));
-  if (!found) throw new Error("Perusahaan tidak ditemukan.");
+  if (!found) throw new Error("Company not found.");
   return found;
 }
 
@@ -430,7 +430,7 @@ export async function updateAdminCompany(
   const current = getStoredCompanies();
   const index = current.findIndex((c) => String(c.id) === String(id));
   if (index === -1) {
-    throw new Error("Perusahaan yang ingin diubah tidak ditemukan.");
+    throw new Error("Company to update not found.");
   }
   const updated = {
     ...current[index],
@@ -522,7 +522,7 @@ export async function getAdminPositionById(id: string | number): Promise<Positio
 
   await delay(200);
   const found = getStoredPositions().find((p) => String(p.id) === String(id));
-  if (!found) throw new Error("Posisi tidak ditemukan.");
+  if (!found) throw new Error("Position not found.");
   return found;
 }
 
@@ -586,7 +586,7 @@ export async function updateAdminPosition(
   const current = getStoredPositions();
   const index = current.findIndex((p) => String(p.id) === String(id));
   if (index === -1) {
-    throw new Error("Posisi tidak ditemukan.");
+    throw new Error("Position to update not found.");
   }
   const updated = {
     ...current[index],

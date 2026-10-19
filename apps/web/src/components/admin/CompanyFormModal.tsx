@@ -99,23 +99,23 @@ export function CompanyFormModal({
     const nextErrors: FormErrors = {};
 
     if (!name.trim()) {
-      nextErrors.name = "Nama perusahaan wajib diisi.";
+      nextErrors.name = "Company name is required.";
     } else if (name.trim().length < 2) {
-      nextErrors.name = "Nama perusahaan minimal 2 karakter.";
+      nextErrors.name = "Company name must be at least 2 characters.";
     }
 
     if (!industry.trim()) {
-      nextErrors.industry = "Industri perusahaan wajib dipilih.";
+      nextErrors.industry = "Industry selection is required.";
     }
 
     if (!location.trim()) {
-      nextErrors.location = "Lokasi kantor / basis kerja wajib diisi.";
+      nextErrors.location = "Office location is required.";
     }
 
     if (website.trim()) {
       const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/i;
       if (!urlPattern.test(website.trim())) {
-        nextErrors.website = "Format URL website tidak valid (contoh: https://example.com).";
+        nextErrors.website = "Invalid website URL format (e.g. https://example.com).";
       }
     }
 
@@ -153,7 +153,7 @@ export function CompanyFormModal({
       setSubmitError(
         err instanceof Error
           ? err.message
-          : "Gagal menyimpan data perusahaan. Silakan coba kembali."
+          : "Failed to save company data. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -164,11 +164,11 @@ export function CompanyFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? "Edit Data Perusahaan" : "Tambah Perusahaan Mitra"}
+      title={isEditing ? "Edit Partner Company" : "Add Partner Company"}
       description={
         isEditing
-          ? "Perbarui informasi profil dan detail mitra perusahaan industri."
-          : "Lengkapi formulir di bawah ini untuk mendaftarkan mitra industri baru di CareerTrack."
+          ? "Update profile details and industry integration for this company."
+          : "Fill in the form below to register a new industry partner in CareerTrack."
       }
       maxWidth="xl"
     >
@@ -183,9 +183,9 @@ export function CompanyFormModal({
       )}
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        {/* Nama Perusahaan */}
+        {/* Company Name */}
         <div>
-          <Label htmlFor="company-name">Nama Perusahaan *</Label>
+          <Label htmlFor="company-name">Company Name *</Label>
           <div className="relative">
             <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
@@ -195,7 +195,7 @@ export function CompanyFormModal({
                 setName(e.target.value);
                 if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
               }}
-              placeholder="Contoh: Aurora Labs"
+              placeholder="e.g. Aurora Labs"
               disabled={submitting}
               className={`pl-9 ${errors.name ? "border-rose-400 ring-rose-400" : ""}`}
             />
@@ -208,10 +208,10 @@ export function CompanyFormModal({
           )}
         </div>
 
-        {/* Industri & Ukuran Perusahaan */}
+        {/* Industry & Size */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="company-industry">Bidang / Industri *</Label>
+            <Label htmlFor="company-industry">Industry *</Label>
             <div className="relative">
               <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <select
@@ -234,7 +234,7 @@ export function CompanyFormModal({
           </div>
 
           <div>
-            <Label htmlFor="company-size">Ukuran Perusahaan</Label>
+            <Label htmlFor="company-size">Company Size</Label>
             <div className="relative">
               <Users className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <select
@@ -246,7 +246,7 @@ export function CompanyFormModal({
               >
                 {SIZE_OPTIONS.map((sz) => (
                   <option key={sz} value={sz}>
-                    {sz} Karyawan
+                    {sz} Employees
                   </option>
                 ))}
               </select>
@@ -254,10 +254,10 @@ export function CompanyFormModal({
           </div>
         </div>
 
-        {/* Lokasi & Website */}
+        {/* Location & Website */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="company-location">Lokasi Kantor / Wilayah *</Label>
+            <Label htmlFor="company-location">Office Location *</Label>
             <div className="relative">
               <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
@@ -267,7 +267,7 @@ export function CompanyFormModal({
                   setLocation(e.target.value);
                   if (errors.location) setErrors((prev) => ({ ...prev, location: undefined }));
                 }}
-                placeholder="Contoh: Jakarta (Hybrid)"
+                placeholder="e.g. Singapore (Hybrid)"
                 disabled={submitting}
                 className={`pl-9 ${errors.location ? "border-rose-400 ring-rose-400" : ""}`}
               />
@@ -281,7 +281,7 @@ export function CompanyFormModal({
           </div>
 
           <div>
-            <Label htmlFor="company-website">Website Perusahaan</Label>
+            <Label htmlFor="company-website">Company Website</Label>
             <div className="relative">
               <Globe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
@@ -305,9 +305,9 @@ export function CompanyFormModal({
           </div>
         </div>
 
-        {/* Warna Brand */}
+        {/* Brand Accent Color */}
         <div>
-          <Label>Aksen Warna Brand</Label>
+          <Label>Brand Accent Color</Label>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {BRAND_COLORS.map((c) => (
@@ -321,7 +321,7 @@ export function CompanyFormModal({
                       : "border-transparent hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
-                  aria-label={`Warna ${c}`}
+                  aria-label={`Color ${c}`}
                 />
               ))}
             </div>
@@ -329,21 +329,21 @@ export function CompanyFormModal({
           </div>
         </div>
 
-        {/* Deskripsi */}
+        {/* Description */}
         <div>
-          <Label htmlFor="company-desc">Deskripsi Singkat Perusahaan</Label>
+          <Label htmlFor="company-desc">Brief Company Description</Label>
           <textarea
             id="company-desc"
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={submitting}
-            placeholder="Jelaskan ringkas profil bisnis, kultur kerja, atau fokus industri perusahaan..."
+            placeholder="Describe business focus, work culture, or core products..."
             className="focus-ring w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 placeholder:text-slate-400 transition hover:border-slate-400"
           />
         </div>
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
           <Button
             type="button"
@@ -352,7 +352,7 @@ export function CompanyFormModal({
             disabled={submitting}
             className="text-slate-600 hover:text-slate-900"
           >
-            Batal
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -382,12 +382,12 @@ export function CompanyFormModal({
                     d="M4 12a8 8 0 018-8v8H4z"
                   />
                 </svg>
-                Menyimpan...
+                Saving...
               </span>
             ) : isEditing ? (
-              "Perbarui Perusahaan"
+              "Update Company"
             ) : (
-              "Simpan Perusahaan"
+              "Save Company"
             )}
           </Button>
         </div>
