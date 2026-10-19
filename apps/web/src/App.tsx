@@ -11,7 +11,11 @@ import Analytics from "@/pages/Analytics";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/AdminLogin";
+import CompanyManagement from "@/pages/admin/CompanyManagement";
+import PositionManagement from "@/pages/admin/PositionManagement";
+import ApplicationManagement from "@/pages/admin/ApplicationManagement";
 import { AppShell } from "@/components/layout/AppShell";
+import { AdminShell } from "@/components/layout/AdminShell";
 
 export default function App() {
   return (
@@ -21,9 +25,14 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Admin Auth */}
+        {/* Admin Portal */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+        <Route element={<AdminShell />}>
+          <Route path="/admin" element={<Navigate to="/admin/companies" replace />} />
+          <Route path="/admin/companies" element={<CompanyManagement />} />
+          <Route path="/admin/positions" element={<PositionManagement />} />
+          <Route path="/admin/applications" element={<ApplicationManagement />} />
+        </Route>
 
         {/* App */}
         <Route element={<AppShell />}>

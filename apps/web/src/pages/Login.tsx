@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Shield, Home } from "lucide-react";
+
 import { loginUser } from "@/services/api";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -8,9 +10,14 @@ import { Logo } from "@/components/ui/Logo";
 
 export default function Login() {
   const nav = useNavigate();
-  const [email, setEmail] = useState("faza@student.example");
-  const [password, setPassword] = useState("demo");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function handleAutoFillDemo() {
+    setEmail("faza@student.example");
+    setPassword("demo");
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +47,7 @@ export default function Login() {
       {/* 2. GRID UTAMA (Membagi Kiri & Kanan secara Seimbang) */}
       <div className="grid w-full gap-12 lg:grid-cols-12 lg:items-center mt-24 lg:mt-0">
           
-          {/* SISI KIRI: Teks Sambutan & Deskripsi (Lebar Proporsional dengan Box Login) */}
+          {/* SISI KIRI: Teks Sambutan & Deskripsi */}
           <div data-ct-dark className="lg:col-span-5">
             <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               Welcome back.
@@ -53,8 +60,6 @@ export default function Login() {
 
           {/* SISI KANAN: Box Login / Form Input */}
           <div className="lg:col-span-5 lg:col-start-8">
-            {/* Lanjutkan kode Box Login Anda tepat di bawah baris ini */}
-
             <Card className="w-full max-w-md rounded-3xl border-teal-800 bg-[#0d4a4d] p-6 shadow-xl">
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
@@ -63,6 +68,7 @@ export default function Login() {
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@student.example"
                     autoComplete="email"
                     required
                   />
@@ -74,6 +80,7 @@ export default function Login() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
                     autoComplete="current-password"
                     required
                   />
@@ -83,15 +90,42 @@ export default function Login() {
                   {loading ? "Signing in…" : "Login"}
                 </Button>
 
-                <div className="text-center text-sm text-teal-100/70">
-                  New to CareerTrack?{" "}
-                  <Link className="text-white hover:underline font-semibold" to="/register">
-                    Create an account
-                  </Link>
+                <div className="flex items-center justify-between text-xs text-teal-100/70 pt-1">
+                  <span>
+                    New to CareerTrack?{" "}
+                    <Link className="text-white hover:underline font-semibold" to="/register">
+                      Create account
+                    </Link>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAutoFillDemo}
+                    className="text-[11px] text-[rgb(var(--gold))] hover:underline font-medium focus:outline-none"
+                  >
+                    Demo autofill
+                  </button>
                 </div>
 
-                <div className="rounded-xl border border-teal-700 bg-teal-900/40 p-4 text-xs text-teal-100">
-                  Tip: This demo auto-fills credentials. Click Login.
+                {/* Tautan ke Admin Portal & Landing Page */}
+                <div className="pt-3 border-t border-teal-700/50 space-y-2 text-center">
+                  <div>
+                    <Link
+                      to="/admin/login"
+                      className="inline-flex items-center gap-1.5 text-xs text-teal-200/80 hover:text-white hover:underline transition"
+                    >
+                      <Shield className="h-3.5 w-3.5 text-teal-300" />
+                      <span>Masuk sebagai Staff</span>
+                    </Link>
+                  </div>
+                  <div>
+                    <Link
+                      to="/"
+                      className="inline-flex items-center gap-1.5 text-[11px] text-teal-300/70 hover:text-white hover:underline transition"
+                    >
+                      <Home className="h-3 w-3" />
+                      <span>Kembali ke Landing Page</span>
+                    </Link>
+                  </div>
                 </div>
               </form>
             </Card>
@@ -101,3 +135,5 @@ export default function Login() {
     </div>
   );
 }
+
+
