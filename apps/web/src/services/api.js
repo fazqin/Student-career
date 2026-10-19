@@ -1,9 +1,11 @@
 import {
-  getPositionById,
-  isSavedPosition,
-  toggleSavedPosition,
-  createApplication,
-} from "@/services/api";
+  applications as _applications,
+  companies as _companies,
+  interviews as _interviews,
+  positions as _positions,
+  profile as _profile,
+} from "../data/mockData";
+
 
 const API_BASE_URL = "http://localhost:3000/api";
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));

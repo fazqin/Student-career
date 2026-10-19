@@ -10,6 +10,7 @@ import Interviews from "@/pages/Interviews";
 import Analytics from "@/pages/Analytics";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import { AppShell } from "@/components/layout/AppShell";
 
 export default function App() {
@@ -19,6 +20,10 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Admin Auth */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
 
         {/* App */}
         <Route element={<AppShell />}>
