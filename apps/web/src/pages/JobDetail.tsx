@@ -102,7 +102,6 @@ setAlreadyApplied(applied);
 
   try {
     await createApplication({
-      user_id: "8f24333c-16ba-496a-9090-7f0438e498f3",
       position_id: position.id,
       status: "Applied",
       priority: applicationPriority,

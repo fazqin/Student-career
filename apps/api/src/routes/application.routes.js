@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 
@@ -12,7 +11,9 @@ const {
 } = require('../controllers/application.controller');
 
 const {
-  validateApplicationBody
+    validateCreateApplication,
+    validateUpdateApplication,
+    validatePatchApplication
 } = require('../middlewares/validation/application.validate');
 
 const {
@@ -29,13 +30,13 @@ router.get('/', getAllApplications);
 router.get('/:id', getApplicationById);
 
 // POST tambah lamaran
-router.post('/', validateApplicationBody, createApplication);
+router.post('/', validateCreateApplication, createApplication);
 
 // PUT update seluruh data
-router.put('/:id', validateApplicationBody, updateApplication);
+router.put('/:id', validateUpdateApplication, updateApplication);
 
 // PATCH update status
-router.patch('/:id', patchApplication);
+router.patch('/:id',validatePatchApplication, patchApplication);
 
 // DELETE hapus lamaran
 router.delete('/:id', deleteApplication);

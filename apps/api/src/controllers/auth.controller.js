@@ -112,69 +112,6 @@ async function register(req, res, next) {
     }
 }
 
-
-async function getMe(req, res, next) {
-    try {
-        const result = await pool.query(
-            `SELECT
-                u.id,
-                u.email,
-                u.role,
-                u.created_at,
-                p.full_name,
-                p.university,
-                p.major,
-                p.semester,
-                p.graduation_year,
-                p.headline,
-                p.github_url,
-                p.linkedin_url,
-                p.portfolio_url
-             FROM users u
-             LEFT JOIN profiles p ON p.user_id = u.id
-             WHERE u.id = $1`,
-            [req.user.id]
-        );
-
-        if (result.rows.length === 0) {
-            res.clearCookie("access_token", {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "lax",
-                path: "/",
-            });
-
-            return res.status(401).json({
-                success: false,
-                message: "Akun tidak ditemukan. Silakan login kembali.",
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                user: result.rows[0],
-            },
-        });
-    } catch (error) {
-        return next(error);
-    }
-}
-
-function logout(req, res) {
-    res.clearCookie("access_token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-    });
-
-    return res.status(200).json({
-        success: true,
-        message: "Logout berhasil.",
-    });
-}
-
 async function login(req, res, next) {
     try {
         const { email, password } = req.body;
@@ -244,6 +181,71 @@ async function login(req, res, next) {
         return next(error);
     }
 }
+
+async function getMe(req, res, next) {
+    try {
+        const result = await pool.query(
+            `SELECT
+                u.id,
+                u.email,
+                u.role,
+                u.created_at,
+                p.full_name,
+                p.university,
+                p.major,
+                p.semester,
+                p.graduation_year,
+                p.location,
+                p.headline,
+                p.github_url,
+                p.linkedin_url,
+                p.portfolio_url
+             FROM users u
+             LEFT JOIN profiles p ON p.user_id = u.id
+             WHERE u.id = $1`,
+            [req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            res.clearCookie("access_token", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/",
+            });
+
+            return res.status(401).json({
+                success: false,
+                message: "Akun tidak ditemukan. Silakan login kembali.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                user: result.rows[0],
+            },
+        });
+    } catch (error) {
+        return next(error);
+    }
+}
+
+function logout(req, res) {
+    res.clearCookie("access_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: "Logout berhasil.",
+    });
+}
+
+
 
 
 module.exports = {

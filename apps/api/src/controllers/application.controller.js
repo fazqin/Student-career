@@ -3,103 +3,109 @@ const pool = require("../config/db");
 
 // GET semua
 
-const getAllApplications = async (req, res) => {
+
+const getAllApplications = async (req, res, next) => {
     try {
+        const { id: userId, role } = req.user;
+
         const query = `
             SELECT
-            a.id,
-            a.user_id,
-            a.position_id,
-            a.status,
-            a.priority,
-            a.applied_date,
-            a.deadline AS application_deadline,
-            a.notes,
-            a.created_at,
-            a.updated_at,
-            p.title AS position_title,
-            c.industry,
-            p.deadline AS position_deadline,
-            c.name AS company_name,
-            c.industry AS company_industry
-        FROM applications a
-        JOIN positions p ON p.id = a.position_id
-        JOIN companies c ON c.id = p.company_id
-        ORDER BY a.id ASC;
+                a.id,
+                a.user_id,
+                a.position_id,
+                a.status,
+                a.priority,
+                a.applied_date,
+                a.deadline AS application_deadline,
+                a.notes,
+                a.created_at,
+                a.updated_at,
+                p.title AS position_title,
+                p.deadline AS position_deadline,
+                c.name AS company_name,
+                c.industry AS company_industry
+            FROM applications a
+            JOIN positions p ON p.id = a.position_id
+            JOIN companies c ON c.id = p.company_id
+            WHERE ($1 = 'admin' OR a.user_id = $2)
+            ORDER BY a.id ASC;
         `;
 
-        const result = await pool.query(query);
+        const result = await pool.query(query, [role, userId]);
 
-        res.status(200).json({
+        return res.status(200).json({
+            success: true,
             message: "Applications retrieved successfully",
             data: result.rows
         });
     } catch (error) {
-        console.error("Error retrieving applications:", error.message);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
+        return next(error);
     }
 };
 
 
+
 // GET spesifik by id
 
-const getApplicationById = async (req, res) => {
+
+const getApplicationById = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { id: userId, role } = req.user;
 
-        if (!/^\d+$/.test(id)) {
+        if (!/^[1-9]\d*$/.test(id)) {
             return res.status(400).json({
+                success: false,
                 message: "Application ID must be a positive integer"
             });
         }
 
         const query = `
             SELECT
-                id,
-                user_id,
-                position_id,
-                status,
-                priority,
-                applied_date,
-                deadline,
-                notes,
-                created_at,
-                updated_at
-            FROM applications
-            WHERE id = $1;
+                a.id,
+                a.user_id,
+                a.position_id,
+                a.status,
+                a.priority,
+                a.applied_date,
+                a.deadline,
+                a.notes,
+                a.created_at,
+                a.updated_at
+            FROM applications a
+            WHERE a.id = $1
+              AND ($2 = 'admin' OR a.user_id = $3);
         `;
 
-        const result = await pool.query(query, [id]);
+        const result = await pool.query(query, [id, role, userId]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
+                success: false,
                 message: "Application not found"
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
+            success: true,
             message: "Application retrieved successfully",
             data: result.rows[0]
         });
     } catch (error) {
-        console.error("Error retrieving application:", error.message);
-
-        res.status(500).json({
-            message: "Internal server error"
-        });
+        return next(error);
     }
 };
 
 
+
 // POST tambah lamaran baru
 
-const createApplication = async (req, res) => {
+
+const createApplication = async (req, res, next) => {
     try {
+        const userId = req.user.id;
+
         const {
-            user_id,
             position_id,
             status = "Applied",
             priority = "Medium",
@@ -121,7 +127,7 @@ const createApplication = async (req, res) => {
         `;
 
         const values = [
-            user_id,
+            userId,
             position_id,
             status,
             priority,
@@ -132,40 +138,47 @@ const createApplication = async (req, res) => {
         const result = await pool.query(query, values);
 
         return res.status(201).json({
+            success: true,
             message: "Application created successfully",
             data: result.rows[0],
         });
     } catch (error) {
-        console.error("Error creating application:", error.message);
-
-        // Foreign key tidak ditemukan
         if (error.code === "23503") {
             return res.status(400).json({
-                message: "user_id or position_id does not reference an existing record",
+                success: false,
+                message: "position_id does not reference an existing position",
             });
         }
 
-        return res.status(500).json({
-            message: "Internal server error",
-        });
+        if (error.code === "23514") {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid status or priority",
+            });
+        }
+
+        return next(error);
     }
 };
 
 
+
 // PUT update seluruh data
 
-const updateApplication = async (req, res) => {
+
+const updateApplication = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { id: userId, role } = req.user;
 
-        if (!/^\d+$/.test(id) || Number(id) <= 0) {
+        if (!/^[1-9]\d*$/.test(id)) {
             return res.status(400).json({
+                success: false,
                 message: "Application ID must be a positive integer",
             });
         }
 
         const {
-            user_id,
             position_id,
             status,
             priority,
@@ -176,69 +189,67 @@ const updateApplication = async (req, res) => {
         const query = `
             UPDATE applications
             SET
-                user_id = $1,
-                position_id = $2,
-                status = $3,
-                priority = $4,
-                deadline = $5,
-                notes = $6,
+                position_id = $1,
+                status = $2,
+                priority = $3,
+                deadline = $4,
+                notes = $5,
                 updated_at = NOW()
-            WHERE id = $7
+            WHERE id = $6
+              AND ($7 = 'admin' OR user_id = $8)
             RETURNING *;
         `;
 
         const values = [
-            user_id,
             position_id,
             status,
             priority,
             deadline,
             notes,
             id,
+            role,
+            userId,
         ];
 
         const result = await pool.query(query, values);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
+                success: false,
                 message: "Application not found",
             });
         }
 
         return res.status(200).json({
+            success: true,
             message: "Application updated successfully",
             data: result.rows[0],
         });
     } catch (error) {
-        console.error("Error updating application:", error.message);
-
-        if (error.code === "23503") {
+        if (error.code === "23503" || error.code === "23514") {
             return res.status(400).json({
-                message: "user_id or position_id does not reference an existing record",
+                success: false,
+                message: "Invalid position, status, or priority",
             });
         }
 
-        if (error.code === "23514") {
-            return res.status(400).json({
-                message: "Invalid status or priority",
-            });
-        }
-
-        return res.status(500).json({
-            message: "Internal server error",
-        });
+        return next(error);
     }
 };
 
 
+
 // PATCH update sebagian -> status
 
-const patchApplication = async (req, res) => {
+
+const patchApplication = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { id: userId, role } = req.user;
 
-        if (!/^\d+$/.test(id) || Number(id) <= 0) {
+        if (!/^[1-9]\d*$/.test(id)) {
             return res.status(400).json({
+                success: false,
                 message: "Application ID must be a positive integer",
             });
         }
@@ -263,17 +274,27 @@ const patchApplication = async (req, res) => {
 
         if (updates.length === 0) {
             return res.status(400).json({
+                success: false,
                 message: "At least one valid field must be provided",
             });
         }
 
         updates.push("updated_at = NOW()");
+
         values.push(id);
+        const idParam = values.length;
+
+        values.push(role);
+        const roleParam = values.length;
+
+        values.push(userId);
+        const userParam = values.length;
 
         const query = `
             UPDATE applications
             SET ${updates.join(", ")}
-            WHERE id = $${values.length}
+            WHERE id = $${idParam}
+              AND ($${roleParam} = 'admin' OR user_id = $${userParam})
             RETURNING *;
         `;
 
@@ -281,44 +302,41 @@ const patchApplication = async (req, res) => {
 
         if (result.rows.length === 0) {
             return res.status(404).json({
+                success: false,
                 message: "Application not found",
             });
         }
 
         return res.status(200).json({
+            success: true,
             message: "Application updated successfully",
             data: result.rows[0],
         });
     } catch (error) {
-        console.error("Error patching application:", error.message);
-
-        if (error.code === "23503") {
+        if (error.code === "23503" || error.code === "23514") {
             return res.status(400).json({
-                message: "position_id does not reference an existing position",
+                success: false,
+                message: "Invalid position, status, or priority",
             });
         }
 
-        if (error.code === "23514") {
-            return res.status(400).json({
-                message: "Invalid status or priority",
-            });
-        }
-
-        return res.status(500).json({
-            message: "Internal server error",
-        });
+        return next(error);
     }
 };
 
 
+
 // DELETE hapus lamaran
 
-const deleteApplication = async (req, res) => {
+
+const deleteApplication = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { id: userId, role } = req.user;
 
-        if (!/^\d+$/.test(id) || Number(id) <= 0) {
+        if (!/^[1-9]\d*$/.test(id)) {
             return res.status(400).json({
+                success: false,
                 message: "Application ID must be a positive integer",
             });
         }
@@ -326,35 +344,36 @@ const deleteApplication = async (req, res) => {
         const query = `
             DELETE FROM applications
             WHERE id = $1
+              AND ($2 = 'admin' OR user_id = $3)
             RETURNING *;
         `;
 
-        const result = await pool.query(query, [id]);
+        const result = await pool.query(query, [id, role, userId]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
+                success: false,
                 message: "Application not found",
             });
         }
 
         return res.status(200).json({
+            success: true,
             message: "Application deleted successfully",
             data: result.rows[0],
         });
     } catch (error) {
-        console.error("Error deleting application:", error.message);
-
         if (error.code === "23503") {
             return res.status(409).json({
+                success: false,
                 message: "Application cannot be deleted because it is referenced by another record",
             });
         }
 
-        return res.status(500).json({
-            message: "Internal server error",
-        });
+        return next(error);
     }
 };
+
 
 
 module.exports = {

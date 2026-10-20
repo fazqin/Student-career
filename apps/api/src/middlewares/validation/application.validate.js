@@ -11,78 +11,178 @@ const VALID_STATUSES = [
 
 const VALID_PRIORITIES = ["Low", "Medium", "High"];
 
-const validateApplicationBody = (req, res, next) => {
-    const {
-        user_id,
-        position_id,
-        status = "Applied",
-        priority = "Medium",
-        deadline = null,
-        notes = null,
-    } = req.body;
+// Validasi field yang dikirim
+const validateFields = (body, fields) => {
+    const errors = [];
 
-    // Field wajib
-    if (!user_id || position_id === undefined || position_id === null) {
+    for (const field of fields) {
+        if (!Object.prototype.hasOwnProperty.call(body, field)) {
+            continue;
+        }
+
+        const value = body[field];
+
+        if (field === "position_id") {
+            const valid =
+                (typeof value === "number" && Number.isSafeInteger(value)) ||
+                (typeof value === "string" && /^\d+$/.test(value));
+
+            if (!valid || Number(value) <= 0 ||
+                !Number.isSafeInteger(Number(value))) {
+                errors.push("position_id must be a positive integer");
+            }
+        }
+
+        if (field === "status" &&
+            (typeof value !== "string" || !VALID_STATUSES.includes(value))) {
+            errors.push("Invalid application status");
+        }
+
+        if (field === "priority" &&
+            (typeof value !== "string" || !VALID_PRIORITIES.includes(value))) {
+            errors.push("priority must be Low, Medium, or High");
+        }
+
+        if (field === "deadline" && value !== null) {
+            const isValidFormat =
+                typeof value === "string" &&
+                /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+            let isValidDate = false;
+
+            if (isValidFormat) {
+                const [year, month, day] = value.split("-").map(Number);
+                const date = new Date(Date.UTC(year, month - 1, day));
+
+                isValidDate =
+                    date.getUTCFullYear() === year &&
+                    date.getUTCMonth() === month - 1 &&
+                    date.getUTCDate() === day;
+            }
+
+            if (!isValidDate) {
+                errors.push("deadline must be a valid date in YYYY-MM-DD format or null");
+            }
+        }
+
+                if (field === "notes" && value !== null &&
+                    typeof value !== "string") {
+                    errors.push("notes must be a string or null");
+                }
+            }
+
+            return errors;
+        };
+
+// POST: membuat lamaran
+const validateCreateApplication = (req, res, next) => {
+    const { position_id } = req.body;
+
+    if (position_id === undefined || position_id === null) {
         return res.status(400).json({
-            message: "user_id and position_id are required",
+            success: false,
+            message: "position_id is required",
         });
     }
 
-    // Validasi format UUID
-    const uuidPattern =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const errors = validateFields(req.body, [
+        "position_id",
+        "status",
+        "priority",
+        "deadline",
+        "notes",
+    ]);
 
-    if (typeof user_id !== "string" || !uuidPattern.test(user_id)) {
+    if (errors.length > 0) {
         return res.status(400).json({
-            message: "user_id must be a valid UUID",
+            success: false,
+            message: "Invalid application data",
+            errors,
         });
     }
 
-    // Validasi position_id sebagai integer positif
-    if (
-        !(
-            (typeof position_id === "number" && Number.isSafeInteger(position_id)) ||
-            (typeof position_id === "string" && /^\d+$/.test(position_id))
-        ) ||
-        Number(position_id) <= 0 ||
-        !Number.isSafeInteger(Number(position_id))
-    ) {
+    return next();
+};
+
+// PUT: mengganti data lamaran
+const validateUpdateApplication = (req, res, next) => {
+    const requiredFields = ["position_id", "status", "priority"];
+    const missingFields = requiredFields.filter(
+        (field) => req.body[field] === undefined
+    );
+
+    if (missingFields.length > 0) {
         return res.status(400).json({
-            message: "position_id must be a positive integer",
+            success: false,
+            message: "Required fields are missing",
+            errors: missingFields.map((field) => `${field} is required`),
         });
     }
 
-    if (!VALID_STATUSES.includes(status)) {
+    const errors = validateFields(req.body, [
+        "position_id",
+        "status",
+        "priority",
+        "deadline",
+        "notes",
+    ]);
+
+    if (errors.length > 0) {
         return res.status(400).json({
-            message: "Invalid application status",
-            allowed_values: VALID_STATUSES,
+            success: false,
+            message: "Invalid application data",
+            errors,
         });
     }
 
-    if (!VALID_PRIORITIES.includes(priority)) {
+    return next();
+};
+
+// PATCH: memperbarui sebagian data lamaran
+const validatePatchApplication = (req, res, next) => {
+    const allowedFields = [
+        "position_id",
+        "status",
+        "priority",
+        "deadline",
+        "notes",
+    ];
+
+    const suppliedFields = Object.keys(req.body);
+    const invalidFields = suppliedFields.filter(
+        (field) => !allowedFields.includes(field)
+    );
+
+    if (invalidFields.length > 0) {
         return res.status(400).json({
-            message: "priority must be Low, Medium, or High",
+            success: false,
+            message: "Unknown or disallowed fields",
+            errors: invalidFields,
         });
     }
 
-    if (
-        deadline !== null &&
-        (typeof deadline !== "string" || Number.isNaN(Date.parse(deadline)))
-    ) {
+    if (suppliedFields.length === 0) {
         return res.status(400).json({
-            message: "deadline must be a valid date or null",
+            success: false,
+            message: "At least one field must be provided",
         });
     }
 
-    if (notes !== null && typeof notes !== "string") {
+    const errors = validateFields(req.body, allowedFields);
+
+    if (errors.length > 0) {
         return res.status(400).json({
-            message: "notes must be a string or null",
+            success: false,
+            message: "Invalid application data",
+            errors,
         });
     }
 
-    next();
+    return next();
 };
 
 module.exports = {
-    validateApplicationBody,
+    validateCreateApplication,
+    validateUpdateApplication,
+    validatePatchApplication,
 };

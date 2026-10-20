@@ -27,26 +27,148 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-export async function loginUser() {
-  await delay();
-  return { token: "mock_token", user: clone(state.profile) };
+export async function loginUser({ email, password }) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Login gagal");
+  }
+
+  return result.data;
 }
 
-export async function registerUser() {
-  await delay();
-  return { token: "mock_token", user: clone(state.profile) };
+
+export async function registerUser({ name, email, password, university, major, semester }) {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      full_name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+      university,
+      major,
+      semester: Number(semester)
+    })
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Registrasi gagal.");
+  }
+
+  return result.data;
 }
+
 
 export async function getProfile() {
-  await delay();
-  return clone(state.profile);
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Gagal mengambil profil");
+  }
+
+  const user = result.data.user;
+
+  const nameParts = (user.full_name ?? "").trim().split(/\s+/);
+
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: nameParts[0] ?? "",
+    lastName: nameParts.slice(1).join(" "),
+    title: user.headline ?? "",
+    university: user.university ?? "",
+    graduation: user.graduation_year?.toString() ?? "",
+    location: user.location ?? "",
+    links: {
+      linkedin: user.linkedin_url ?? "",
+      github: user.github_url ?? "",
+      portfolio: user.portfolio_url ?? "",
+    },
+    major: user.major ?? "",
+    semester: user.semester ?? "",
+    focusAreas: [],
+  };
 }
 
+
 export async function updateProfile(partial) {
-  await delay();
-  state.profile = { ...state.profile, ...partial };
-  return clone(state.profile);
+  const fullName = [
+    partial.firstName,
+    partial.lastName
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  const response = await fetch(`${API_BASE_URL}/profiles/me`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      full_name: fullName,
+      university: partial.university,
+      major: partial.major,
+      semester: Number(partial.semester),
+      graduation_year: partial.graduation
+        ? Number(partial.graduation)
+        : null,
+      headline: partial.title ?? "",
+      location: partial.location ?? "",
+      github_url: partial.links?.github ?? "",
+      linkedin_url: partial.links?.linkedin ?? "",
+      portfolio_url: partial.links?.portfolio ?? ""
+    })
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Gagal memperbarui profil"
+    );
+  }
+
+  return {
+    ...partial,
+    id: result.data.profile.user_id,
+    firstName: result.data.profile.full_name.split(/\s+/)[0] ?? "",
+    lastName: result.data.profile.full_name.split(/\s+/).slice(1).join(" "),
+    university: result.data.profile.university,
+    major: result.data.profile.major,
+    semester: result.data.profile.semester,
+    graduation: result.data.profile.graduation_year?.toString() ?? "",
+    title: result.data.profile.headline ?? "",
+    location: result.data.profile.location ?? "",
+    links: {
+      github: result.data.profile.github_url ?? "",
+      linkedin: result.data.profile.linkedin_url ?? "",
+      portfolio: result.data.profile.portfolio_url ?? ""
+    }
+  };
 }
+
 
 export async function getCompanies() {
   await delay();
@@ -145,7 +267,9 @@ export async function getPositionById(positionId) {
 
 
 export async function getApplications() {
-  const response = await fetch(`${API_BASE_URL}/applications`);
+  const response = await fetch(`${API_BASE_URL}/applications`, {
+    credentials: "include"
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch applications");
@@ -183,30 +307,25 @@ export async function getApplications() {
 
 
 export async function createApplication(payload) {
-  const response = await fetch(
-    "http://localhost:3000/api/applications",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: payload.user_id,
-        position_id: Number(payload.position_id),
-        status: payload.status || "Applied",
-        priority: payload.priority || "Medium",
-        deadline: payload.deadline || null,
-        notes: payload.notes || null,
-      }),
-    }
-  );
-    
+  const response = await fetch(`${API_BASE_URL}/applications`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      position_id: Number(payload.position_id),
+      status: payload.status ?? "Applied",
+      priority: payload.priority ?? "Medium",
+      deadline: payload.deadline ?? null,
+      notes: payload.notes ?? null,
+    }),
+  });
+
   const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      result.message ?? "Gagal menambahkan application"
-    );
+    throw new Error(result.message || "Gagal menambahkan lamaran");
   }
 
   return result.data;
@@ -219,6 +338,7 @@ export async function updateApplication(applicationId, payload) {
     `${API_BASE_URL}/applications/${applicationId}`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -251,15 +371,24 @@ export async function updateApplication(applicationId, payload) {
 }
 
 
-export async function updateApplicationStatus(applicationId, stage) {
-  return updateApplication(applicationId, { stage });
+export async function updateApplicationStatus(applicationId, status) {
+  return updateApplication(applicationId, { status });
 }
 
 export async function deleteApplication(applicationId) {
-  await delay();
-  state.applications = state.applications.filter((a) => a.id !== applicationId);
-  state.interviews = state.interviews.filter((i) => i.applicationId !== applicationId);
-  return { ok: true };
+  const response = await fetch(
+    `${API_BASE_URL}/applications/${applicationId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete application");
+  }
+
+  return response.json();
 }
 
 export async function getInterviews() {
