@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
 import { registerUser } from "@/services/api";
 import { Button } from "@/components/ui/Button";
@@ -48,24 +49,40 @@ async function onSubmit(e: React.FormEvent) {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[rgb(var(--hero-bg))]">
+      {/* Background Radial Gradients */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(20,184,166,0.22),transparent_52%),radial-gradient(circle_at_80%_10%,rgba(234,179,8,0.12),transparent_58%)]" />
       <div className="noise pointer-events-none absolute inset-0" />
 
-      <div className="mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6">
-        <div className="grid w-full gap-8 lg:grid-cols-12 lg:items-center">
-            <div data-ct-dark className="lg:col-span-6">
-              <Logo />
-              <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-white">
-                Start tracking like a pro.
-              </h1>
-              <p className="mt-4 max-w-md text-pretty text-base text-teal-100/70">
-                Create your CareerTrack workspace. Everything is mock data for now — the architecture is
-                ready to connect to a REST API later.
-              </p>
-            </div>
+      {/* Clean Back Button at Top-Left */}
+      <div className="absolute left-4 top-8 sm:left-6 lg:left-8 z-20">
+        <Link
+          to="/"
+          className="focus-ring inline-flex items-center gap-1.5 rounded-lg border border-teal-700/60 bg-teal-950/50 px-3 py-1.5 text-xs font-medium text-teal-200 hover:border-teal-500 hover:text-white transition"
+          aria-label="Back to Landing Page"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back</span>
+        </Link>
+      </div>
 
+      {/* Main Container */}
+      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6">
+        <div className="grid w-full gap-8 lg:grid-cols-12 lg:items-center mt-16 sm:mt-0">
+          {/* Left Column: Logo & Header */}
+          <div data-ct-dark className="lg:col-span-6 space-y-4">
+            <Logo className="scale-110 origin-left" />
+            <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Start tracking like a pro.
+            </h1>
+            <p className="max-w-md text-pretty text-base text-teal-100/70">
+              Create your CareerTrack workspace. Everything is mock data for now — the architecture is
+              ready to connect to a REST API later.
+            </p>
+          </div>
+
+          {/* Right Column: Register Form Card */}
           <div className="lg:col-span-6 lg:flex lg:justify-end">
-            <Card className="w-full max-w-md rounded-3xl border-teal-800 bg-[#0d4a4d] p-6 shadow-xl">
+            <Card className="w-full max-w-md rounded-3xl border-teal-800 bg-[#0d4a4d] p-6 sm:p-8 shadow-xl">
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name" className="text-white font-semibold text-sm">
@@ -79,19 +96,23 @@ async function onSubmit(e: React.FormEvent) {
                     required
                   />
                 </div>
+
                 <div>
                   <Label htmlFor="email" className="text-white font-semibold text-sm">
                     Email
                   </Label>
                   <Input
                     id="email"
+                    type="email"
                     placeholder="alex@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@student.example"
                     autoComplete="email"
                     required
                   />
                 </div>
+
                 <div>
                   <Label htmlFor="password" className="text-white font-semibold text-sm">
                     Password
@@ -109,7 +130,8 @@ async function onSubmit(e: React.FormEvent) {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      tabIndex={-1}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
@@ -134,7 +156,6 @@ async function onSubmit(e: React.FormEvent) {
                     required
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="major" className="text-white font-semibold text-sm">
                     Major / Jurusan
@@ -172,7 +193,7 @@ async function onSubmit(e: React.FormEvent) {
                   {loading ? "Creating…" : "Create account"}
                 </Button>
 
-                <div className="text-center text-sm text-teal-100/70">
+                <div className="text-center text-sm text-teal-100/70 pt-1">
                   Already have an account?{" "}
                   <Link className="text-white hover:underline font-semibold" to="/login">
                     Login
