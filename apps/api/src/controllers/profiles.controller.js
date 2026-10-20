@@ -1,68 +1,114 @@
-const profiles = [
-    {
-        id: 1,
-        name: "Agus Teri",
-        university: "Princeton University",
-        major: "Computer Science",
-        semester: 5,
-        github: "https://github.com/agusteri",
-        linkedin: "https://linkedin.com/in/agusteri",
-        portfolio: "https://agusteri.dev"
-    },
-    {
-        id: 2,
-        name: "Silvi Keju",
-        university: "Cakrawala University",
-        major: "Information Systems",
-        semester: 4,
-        github: "https://github.com/silvikeju",
-        linkedin: "https://linkedin.com/in/silvikeju",
-        portfolio: "https://silvikeju.dev"
-    }
-];
 
-// GET semua profiles
-const getAllProfiles = (req, res) => {
-    res.json(profiles);
+const pool = require("../config/db");
+
+// GET semua profiles (endpoint lama, tetap dipertahankan)
+const getAllProfiles = async (req, res, next) => {
+    try {
+        const result = await pool.query(`
+            SELECT
+                p.id,
+                p.user_id,
+                u.email,
+                p.full_name,
+                p.university,
+                p.major,
+                p.semester,
+                p.graduation_year,
+                p.location,
+                p.headline,
+                p.github_url,
+                p.linkedin_url,
+                p.portfolio_url
+            FROM profiles p
+            JOIN users u ON u.id = p.user_id
+            ORDER BY p.full_name ASC
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        next(error);
+    }
 };
 
-// PUT profile berdasarkan id
-const putProfileById = (req, res, next) => {
-    const id = parseInt(req.params.id, 10);
+// PUT profil milik pengguna yang sedang login
+const updateMyProfile = async (req, res, next) => {
+    try {
+        const {
+            full_name,
+            university,
+            major,
+            semester,
+            graduation_year,
+            headline,
+            github_url,
+            linkedin_url,
+            portfolio_url,
+            location
+        } = req.body;
 
-    const profile = profiles.find(
-        (item) => item.id === id
-    );
+        const result = await pool.query(
+            `UPDATE profiles
+             SET
+                full_name = $1,
+                university = $2,
+                major = $3,
+                semester = $4,
+                graduation_year = $5,
+                headline = $6,
+                github_url = $7,
+                linkedin_url = $8,
+                portfolio_url = $9,
+                location = $10,
+                updated_at = NOW()
+             WHERE user_id = $11
+             RETURNING
+                id,
+                user_id,
+                full_name,
+                university,
+                major,
+                semester,
+                graduation_year,
+                headline,
+                github_url,
+                linkedin_url,
+                portfolio_url,
+                location,
+                updated_at`,
+            [
+                full_name.trim(),
+                university.trim(),
+                major.trim(),
+                Number(semester),
+                graduation_year === "" || graduation_year == null
+                    ? null
+                    : Number(graduation_year),
+                headline ?? null,
+                github_url ?? null,
+                linkedin_url ?? null,
+                portfolio_url ?? null,
+                location ?? null,
+                req.user.id
+            ]
+        );
 
-    if (!profile) {
-        const error = new Error("Profile Not Found");
-        error.status = 404;
+        if (result.rowCount === 0) {
+            const error = new Error("Profile Not Found");
+            error.status = 404;
+            return next(error);
+        }
 
-        return next(error);
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            data: { profile: result.rows[0] }
+        });
+    } catch (error) {
+        next(error);
     }
-
-    const {
-        name,
-        university,
-        major,
-        semester,
-        github,
-        linkedin,
-        portfolio
-    } = req.body;
-
-    profile.name = name;
-    profile.university = university;
-    profile.major = major;
-    profile.semester = semester;
-    profile.github = github;
-    profile.linkedin = linkedin;
-    profile.portfolio = portfolio;
-
-    res.json(profile);
 };
 
 module.exports = {
     getAllProfiles,
-    putProfileById
+    updateMyProfile
 };

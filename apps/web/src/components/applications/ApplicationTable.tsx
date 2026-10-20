@@ -1,16 +1,50 @@
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/utils/cn";
 import { formatCompactDate } from "@/utils/format";
-import { getPosition, getPositionCompany } from "@/utils/join";
 
-export function ApplicationTable({ applications }: { applications: any[] }) {
+
+export function ApplicationTable({ 
+  applications, 
+  onEdit
+  }: { 
+  applications: any[]; 
+  onEdit?: (app: any) => void; 
+  }) {
+  const priorityOrder: Record<string, number> = {
+  High: 1,
+  Medium: 2,
+  Low: 3,
+};
+
+const activeApplications = (applications ?? []).filter(
+  (a) => a.status !== "Withdrawn"
+);
+
+const sortedApplications = [...activeApplications].sort(
+  (a, b) =>
+    (priorityOrder[a.priority] ?? 99) -
+    (priorityOrder[b.priority] ?? 99)
+);
+
+  if (sortedApplications.length === 0) {
+    return (
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <div className="text-2xl">📋</div>
+          <div className="mt-3 text-sm font-medium text-slate-700">No active applications</div>
+          <div className="mt-1 text-xs text-slate-500">Applications you withdraw will appear in the History tab.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-[900px] w-full border-collapse">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr className="text-left text-xs text-slate-500">
-              {["Company", "Role", "Stage", "Priority", "Updated", "Deadline"].map((h) => (
+              {["Company", "Role", "Stage", "Priority", "Updated", "Deadline", "Actions"].map((h) => (
                 <th key={h} className="px-5 py-4 font-semibold uppercase tracking-wider">
                   {h}
                 </th>
@@ -18,10 +52,10 @@ export function ApplicationTable({ applications }: { applications: any[] }) {
             </tr>
           </thead>
           <tbody>
-            {(applications ?? []).map((a) => {
-              const pos = getPosition(a.positionId);
-              const company = pos ? getPositionCompany(pos.id) : undefined;
-              const deadline = pos?.deadline;
+            {sortedApplications.map((a) => {
+              const pos = a.position;
+              const company = a.company;
+              const deadline = a.deadline;
               const pri = a.priority as string;
 
               return (
@@ -38,7 +72,9 @@ export function ApplicationTable({ applications }: { applications: any[] }) {
                     <div className="mt-1 text-[11px] text-slate-500">{pos?.team ?? "Team"}</div>
                   </td>
                   <td className="px-5 py-4">
-                    <Badge variant="stage">{a.stage}</Badge>
+                    <Badge variant="stage">
+                      {a.status ?? a.stage ?? "Unknown"}
+                    </Badge>
                   </td>
                   <td className="px-5 py-4">
                     <span
@@ -57,6 +93,16 @@ export function ApplicationTable({ applications }: { applications: any[] }) {
                   <td className="px-5 py-4 text-xs text-slate-500">{formatCompactDate(a.updatedAt)}</td>
                   <td className="px-5 py-4 text-xs text-slate-500">
                     {deadline ? formatCompactDate(deadline) : "—"}
+                  </td>
+                  <td className="px-5 py-4">
+                    <button
+                      type="button"
+                      onClick={() => onEdit?.(a)}
+                      className="text-xs font-medium text-teal-700 hover:text-teal-900"
+                    >
+                      Edit
+                    </button>
+                    
                   </td>
                 </tr>
               );
