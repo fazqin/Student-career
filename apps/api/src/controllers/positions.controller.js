@@ -1,27 +1,3 @@
-const positions = [
-    {
-        id: 1,
-        name: "ML Engineer",
-        industry: "Telecommunication",
-        location: "Bandung",
-        InternStatus: "Paid"
-    },
-    {
-        id: 2,
-        name: "Data Scientist",
-        industry: "Technology",
-        location: "Jakarta",
-        status: "Unpaid"
-    },
-    {
-        id: 3,
-        name: "Frontend Developer Intern",
-        industry: "Technology",
-        location: "Jakarta Selatan",
-        status: "Paid"
-    }
-
-];
 
 const pool = require("../config/db");
 
@@ -125,42 +101,122 @@ const getPositionById = async (req, res) => {
 
 
 // POST Position
-const postAllPosition = (req, res) => {
-    const {name, industry, location, status} = req.body;
-
-    const newPosition = {
-        id: positions.length + 1,
-        company_id,
-        name,
-        industry,
-        location,
-        status
+const postAllPosition = async (req, res, next) => {
+    try {
+        const {
+            company_id,
+            companyId,
+            title,
+            description,
+            location,
+            intern_status,
+            internStatus,
+            work_type,
+            type,
+            salary_range,
+            salaryRange,
+            deadline
+        } = req.body;
+        const targetCompanyId = company_id || companyId;
+        const targetTitle = title;
+        const targetDescription = description || "";
+        const targetLocation = location;
+        const targetInternStatus = intern_status || internStatus || "Paid";
+        const targetWorkType = work_type || type || "Internship";
+        const targetSalaryRange = salary_range || salaryRange || null;
+        const targetDeadline = deadline ? new Date(deadline) : null;
+        const query = `
+            INSERT INTO positions (
+                company_id,
+                title,
+                description,
+                location,
+                intern_status,
+                work_type,
+                salary_range,
+                deadline
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *;
+        `;
+        const values = [
+            targetCompanyId,
+            targetTitle,
+            targetDescription,
+            targetLocation,
+            targetInternStatus,
+            targetWorkType,
+            targetSalaryRange,
+            targetDeadline
+        ];
+        const result = await pool.query(query, values);
+        return res.status(201).json({
+            message: "Position created successfully",
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error("Error creating position:", error.message);
+        return next(error);
     }
-    positions.push(newPosition);
-    res.status(201).json(newPosition);
-}
+};
 
 // PUT Position by id
-const putPositionById = (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const position = positions.find(
-        (item) => item.id === id
-    )
-    const {company_id, name, industry, location, status} = req.body;
-
-    if (position) {
-        position.company_id = company_id;
-        position.name = name;
-        position.industry = industry;
-        position.location = location;
-        position.status = status;
-        res.json(position);
-    } else {
-        res.status(404).json({
-            error: "Position Not Found"
+const putPositionById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const {
+            company_id,
+            companyId,
+            title,
+            description,
+            location,
+            intern_status,
+            internStatus,
+            work_type,
+            type,
+            salary_range,
+            salaryRange,
+            deadline
+        } = req.body;
+        const query = `
+            UPDATE positions
+            SET
+                company_id = COALESCE($1, company_id),
+                title = COALESCE($2, title),
+                description = COALESCE($3, description),
+                location = COALESCE($4, location),
+                intern_status = COALESCE($5, intern_status),
+                work_type = COALESCE($6, work_type),
+                salary_range = COALESCE($7, salary_range),
+                deadline = COALESCE($8, deadline),
+                updated_at = NOW()
+            WHERE id = $9
+            RETURNING *;
+        `;
+        const values = [
+            company_id || companyId,
+            title,
+            description,
+            location,
+            intern_status || internStatus,
+            work_type || type,
+            salary_range || salaryRange,
+            deadline ? new Date(deadline) : null,
+            id
+        ];
+        const result = await pool.query(query, values);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Position not found" });
+        }
+        return res.status(200).json({
+            message: "Position updated successfully",
+            data: result.rows[0]
         });
+    } catch (error) {
+        console.error("Error updating position:", error.message);
+        return next(error);
     }
-}
+};
 
 // PATCH Position by id
 // const patchPositionById = (req, res) => {
@@ -184,21 +240,17 @@ const putPositionById = (req, res) => {
 // }
 
 // DELETE Position by id
-const delPositionById = (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const positionIndex = positions.findIndex(
-        (item) => item.id === id
-    );
-
-    if (positionIndex !== -1) {
-        positions.splice(positionIndex, 1);
-        res.status(200).json({
-            message: "Position deleted successfully"
-        });
-    } else {
-        res.status(404).json({
-            error: "Position Not Found"
-        });
+const delPositionById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query("DELETE FROM positions WHERE id = $1 RETURNING id", [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Position not found" });
+        }
+        return res.status(200).json({ message: "Position deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting position:", error.message);
+        return next(error);
     }
 };
 

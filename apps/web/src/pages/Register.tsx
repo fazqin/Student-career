@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { Eye, EyeOff } from "lucide-react";
 import { registerUser } from "@/services/api";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -107,7 +106,6 @@ async function onSubmit(e: React.FormEvent) {
                     placeholder="alex@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nama@student.example"
                     autoComplete="email"
                     required
                   />

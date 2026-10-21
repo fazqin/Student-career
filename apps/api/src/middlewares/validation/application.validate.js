@@ -44,9 +44,9 @@ const validateFields = (body, fields) => {
         }
 
         if (field === "deadline" && value !== null) {
-            const isValidFormat =
-                typeof value === "string" &&
-                /^\d{4}-\d{2}-\d{2}$/.test(value);
+            const normalizedDate = typeof value === "string" ? value.slice(0, 10) : "";
+            const isValidFormat = /^\d{4}-\d{2}-\d{2}$/.test(normalizedDate);
+
 
             let isValidDate = false;
 

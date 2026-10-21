@@ -52,10 +52,8 @@ export default function JobDetail() {
         const applications = await getApplications();
 
         const applied = applications.some(
-          (a: any) =>
-            String(a.positionId) === String(id) &&
-            a.userId === "8f24333c-16ba-496a-9090-7f0438e498f3"
-        );
+            (a: any) => String(a.positionId) === String(id)
+          );
 
 setAlreadyApplied(applied);
       } catch (error) {
@@ -105,7 +103,7 @@ setAlreadyApplied(applied);
       position_id: position.id,
       status: "Applied",
       priority: applicationPriority,
-      deadline: position.deadline ?? null,
+      deadline: position.deadline ? position.deadline.slice(0, 10) : null,
       notes: null,
     });
 

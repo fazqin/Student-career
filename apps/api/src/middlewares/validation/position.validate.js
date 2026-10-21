@@ -1,44 +1,20 @@
 const validatePosition = (req, res, next) => {
-    const {name, industry, location, InternStatus} = req.body;
+    const { title, name, company_id, companyId, location } = req.body;
+    const targetTitle = title || name;
+    const targetCompanyId = company_id || companyId;
 
-// kalau misal user gak boleh sama sekali ada angka bisa pake !isNaN
-
-    if (!name || !industry || !location || !InternStatus) {
+    if (!targetTitle || !targetCompanyId || !location) {
         return res.status(400).json({
-            error: "name, industry, location, InterStatus are required"
+            error: "Title, company_id, and location are required"
         });
     }
 
-    if (typeof name !== "string" || !name.trim() ||
-        typeof industry !== "string" || !industry.trim() ||
-        typeof location !== "string"  || !location.trim()
-        ) {
+    if (typeof targetTitle !== "string" || targetTitle.trim().length < 3) {
         return res.status(400).json({
-            error: "name, industry, location must be string"
+            error: "Title must be a string with at least 3 characters"
         });
     }
 
-    if(
-        name.trim() === "" ||
-        industry.trim() === "" ||
-        location.trim() === ""
-    ) {
-        return res.status(400).json({
-            error: "name, industry, location cannot be empty"
-        });
-    }
-
-    if(name.trim().length < 3 || name.trim().length > 50) {
-        return res.status(400).json({
-            error: "name must be between 3 and 50 characters"
-        })
-    }
-
-    if (status !== "Paid" && status !== "Unpaid") {
-    return res.status(400).json({
-        error: "status must be Paid or Unpaid"
-    });
-}
     next();
 };
 

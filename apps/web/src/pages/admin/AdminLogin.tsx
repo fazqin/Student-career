@@ -67,7 +67,7 @@ export default function AdminLogin() {
   }
 
   function handleAutoFillDemo() {
-    setEmail("admin@careertrack.com");
+    setEmail("admin@ct.com");
     setPassword("admin123");
     setShowPassword(false);
     setErrors({});

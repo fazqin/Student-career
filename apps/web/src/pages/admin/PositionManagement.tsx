@@ -16,6 +16,9 @@ import {
 import {
   getAdminPositions,
   getAdminCompanies,
+  createAdminPosition,
+  updateAdminPosition,
+  deleteAdminPosition,
   type Company,
   type Position,
   type PositionStatus,
@@ -184,48 +187,25 @@ export default function PositionManagement() {
 
   // Menyimpan Add atau Edit sementara di UI
   async function handleSavePosition(
-    data: PositionFormData,
-    id?: string | number
-  ): Promise<void> {
-    const now = new Date().toISOString();
-
-    const companyName =
-      companies.find(
-        (company) =>
-          String(company.id) === String(data.companyId)
-      )?.name ||
-      data.companyName ||
-      "Company";
-
+  data: PositionFormData,
+  id?: string | number
+): Promise<void> {
+  try {
     if (id !== undefined) {
-      // Edit
-      setPositions((prev) =>
-        prev.map((position) =>
-          String(position.id) === String(id)
-            ? {
-                ...position,
-                ...data,
-                companyName,
-                updatedAt: now,
-              }
-            : position
-        )
-      );
+      // Update existing
+      await updateAdminPosition(id, data);
     } else {
-      // Add
-      const newPosition: Position = {
-        ...data,
-        id: `p_ui_${Date.now()}`,
-        companyName,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      setPositions((prev) => [newPosition, ...prev]);
+      // Create new
+      await createAdminPosition(data);
     }
-
+    // Reload data segar dari Supabase
+    await loadPositions();
     handleCloseForm();
+  } catch (err) {
+    console.error("Failed to save position:", err);
   }
+}
+
 
   // Membuka konfirmasi Delete
   function handleOpenDelete(position: Position) {
@@ -241,17 +221,16 @@ export default function PositionManagement() {
 
   // Menghapus Position sementara dari UI
   async function handleConfirmDelete(): Promise<void> {
-    if (!deletingPosition) return;
-
-    setPositions((prev) =>
-      prev.filter(
-        (position) =>
-          String(position.id) !== String(deletingPosition.id)
-      )
-    );
-
+  if (!deletingPosition) return;
+  try {
+    await deleteAdminPosition(deletingPosition.id);
+    await loadPositions();
     handleCloseDelete();
+  } catch (err) {
+    console.error("Failed to delete position:", err);
   }
+}
+
 
   return (
     <div data-ct-light className="space-y-5">

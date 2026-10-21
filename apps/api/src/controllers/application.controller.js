@@ -113,6 +113,17 @@ const createApplication = async (req, res, next) => {
             notes = null,
         } = req.body;
 
+        const checkExisting = await pool.query(
+            "SELECT id FROM applications WHERE user_id = $1 AND position_id = $2",
+            [userId, position_id]
+        );
+        if (checkExisting.rows.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "Anda sudah pernah melamar posisi ini.",
+            });
+        }
+
         const query = `
             INSERT INTO applications (
                 user_id,
