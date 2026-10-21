@@ -14,6 +14,7 @@ import AdminLogin from "@/pages/admin/AdminLogin";
 import CompanyManagement from "@/pages/admin/CompanyManagement";
 import PositionManagement from "@/pages/admin/PositionManagement";
 import ApplicationManagement from "@/pages/admin/ApplicationManagement";
+import ApplicationBot from "@/pages/admin/ApplicationBot";
 import { AppShell } from "@/components/layout/AppShell";
 import { AdminShell } from "@/components/layout/AdminShell";
 
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/admin/companies" element={<CompanyManagement />} />
           <Route path="/admin/positions" element={<PositionManagement />} />
           <Route path="/admin/applications" element={<ApplicationManagement />} />
+          <Route path="/admin/bot" element={<ApplicationBot />} />
         </Route>
 
         {/* App */}

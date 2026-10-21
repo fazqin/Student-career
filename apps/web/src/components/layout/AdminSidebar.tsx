@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Building2, Briefcase, Layers, LogOut, ShieldCheck } from "lucide-react";
+import { Building2, Briefcase, Layers, LogOut, ShieldCheck, Bot } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/utils/cn";
@@ -9,6 +9,7 @@ const adminNavItems = [
   { to: "/admin/companies", label: "Company Management", icon: Building2 },
   { to: "/admin/positions", label: "Position Management", icon: Briefcase },
   { to: "/admin/applications", label: "Application Management", icon: Layers },
+  { to: "/admin/bot", label: "Application Bot", icon: Bot },
 ];
 
 export function AdminSidebar() {

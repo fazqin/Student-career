@@ -618,3 +618,82 @@ export async function deleteAdminPosition(
   saveStoredPositions(filtered);
   return { success: true, id };
 }
+
+/* =========================================================================
+ * APPLICATION BOT API CONTRACT
+ * ========================================================================= */
+
+export interface BotActionDetail {
+  type: string;
+  applicationId: number;
+  studentName?: string;
+  studentEmail?: string;
+  positionTitle?: string;
+  companyName?: string;
+  oldValue?: string;
+  newValue?: string;
+  timestamp: string;
+}
+
+export interface BotResponse {
+  success: boolean;
+  reply: string;
+  aiEngine: string;
+  actionsTaken: BotActionDetail[];
+  data: any[];
+}
+
+export interface BotStatus {
+  success: boolean;
+  hasKey: boolean;
+  provider: string;
+  model: string;
+  connectedDb: boolean;
+}
+
+export async function sendAdminBotMessage(message: string): Promise<BotResponse> {
+  const res = await fetch(`${API_BASE_URL}/admin/bot/message`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+
+  const result = await res.json();
+  if (!res.ok) {
+    throw new Error(result.message || "Gagal memproses pesan bot");
+  }
+  return result;
+}
+
+export async function getAdminBotStatus(): Promise<BotStatus> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/bot/status`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // fallback
+  }
+
+  return {
+    success: true,
+    hasKey: false,
+    provider: "Smart Rule Engine (No Key)",
+    model: "heuristic-nlp",
+    connectedDb: true,
+  };
+}
+
+export async function getAdminBotApplications(): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/bot/applications`);
+    if (res.ok) {
+      const result = await res.json();
+      return result.data || [];
+    }
+  } catch {
+    // fallback
+  }
+  return [];
+}
+

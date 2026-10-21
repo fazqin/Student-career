@@ -18,6 +18,10 @@ const titles: Record<string, { title: string; subtitle: string }> = {
     title: "Application Management",
     subtitle: "Track and manage student application pipelines",
   },
+  "/admin/bot": {
+    title: "Application Bot Assistant",
+    subtitle: "Manage and automate student applications using AI & natural language",
+  },
 };
 
 export function AdminTopbar() {

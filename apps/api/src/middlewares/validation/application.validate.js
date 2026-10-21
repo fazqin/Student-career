@@ -51,13 +51,17 @@ const validateFields = (body, fields) => {
             let isValidDate = false;
 
             if (isValidFormat) {
-                const [year, month, day] = value.split("-").map(Number);
+                const [year, month, day] = normalizedDate.split("-").map(Number);
                 const date = new Date(Date.UTC(year, month - 1, day));
 
                 isValidDate =
                     date.getUTCFullYear() === year &&
                     date.getUTCMonth() === month - 1 &&
                     date.getUTCDate() === day;
+
+                if (isValidDate) {
+                    body[field] = normalizedDate; 
+                }
             }
 
             if (!isValidDate) {
