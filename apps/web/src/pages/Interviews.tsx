@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getInterviews } from "@/services/api";
+import { getInterviews, getApplications } from "@/services/api";
 import { Card } from "@/components/ui/Card";
 import { formatLongDateTime } from "@/utils/format";
 
@@ -9,8 +9,42 @@ export default function Interviews() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const list = await getInterviews();
-      if (alive) setItems(list);
+      try {
+        const [intvs, apps] = await Promise.all([
+          getInterviews(),
+          getApplications().catch(() => []),
+        ]);
+
+        if (!alive) return;
+
+        // Combine direct interview records and any application with status 'Interview'
+        const applicationInterviews = (apps || [])
+          .filter((a: any) => (a.status || a.stage) === "Interview")
+          .map((a: any) => ({
+            id: `app_${a.id}`,
+            applicationId: String(a.id),
+            title: `${a.position?.title || a.position_title || "Position"} Interview`,
+            contact: a.company?.name || a.company_name || "Hiring Team",
+            location: "Online (Google Meet)",
+            date: a.deadline || a.updatedAt || a.updated_at || new Date().toISOString(),
+          }));
+
+        // Deduplicate by applicationId or id
+        const map = new Map<string, any>();
+        for (const item of intvs || []) {
+          const key = item.applicationId ? `app_${item.applicationId}` : String(item.id);
+          map.set(key, item);
+        }
+        for (const item of applicationInterviews) {
+          if (!map.has(item.id)) {
+            map.set(item.id, item);
+          }
+        }
+
+        setItems(Array.from(map.values()));
+      } catch (err) {
+        console.error("Failed to load interviews:", err);
+      }
     })();
     return () => {
       alive = false;
@@ -18,7 +52,12 @@ export default function Interviews() {
   }, []);
 
   const upcoming = useMemo(
-    () => [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    () =>
+      [...items].sort(
+        (a, b) =>
+          new Date(a.date || a.interview_date).getTime() -
+          new Date(b.date || b.interview_date).getTime()
+      ),
     [items]
   );
 
@@ -51,11 +90,19 @@ export default function Interviews() {
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900">{i.title}</div>
-                  <div className="mt-2 text-xs text-slate-600">{i.contact}</div>
-                  <div className="mt-2 text-xs text-slate-500">{i.location}</div>
+                  <div className="text-sm font-semibold text-slate-900">
+                    {i.title || (i.position ? `${i.position} Interview` : "Interview")}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-600">
+                    {i.contact || i.company || "Hiring Manager"}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500">
+                    {i.location || i.type || "Online (Google Meet)"}
+                  </div>
                 </div>
-                <div className="text-sm font-medium text-slate-700">{formatLongDateTime(i.date)}</div>
+                <div className="text-sm font-medium text-slate-700">
+                  {formatLongDateTime(i.date || i.interview_date)}
+                </div>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-3">

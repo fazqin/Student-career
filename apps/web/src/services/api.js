@@ -392,6 +392,33 @@ export async function deleteApplication(applicationId) {
 }
 
 export async function getInterviews() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/interview`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const rows = Array.isArray(result) ? result : (result.data || []);
+      return rows.map((i) => ({
+        id: String(i.id),
+        applicationId: String(i.application_id ?? i.applicationId ?? ""),
+        title: i.title || (i.position ? `${i.position} Interview` : "Interview"),
+        position: i.position ?? "",
+        company: i.company ?? "",
+        contact: i.contact || i.company || "Hiring Team",
+        location: i.location || i.type || "Online (Google Meet)",
+        date: i.date || i.interview_date || new Date().toISOString(),
+        interview_date: i.interview_date || i.date || new Date().toISOString(),
+        type: i.type || "Online (Google Meet)",
+        status: i.status || "Scheduled",
+      }));
+    }
+  } catch (error) {
+    console.warn("Failed to fetch interviews from REST API, using fallback:", error);
+  }
+
   await delay();
   return clone(state.interviews);
 }
@@ -421,6 +448,22 @@ export async function deleteInterview(interviewId) {
 }
 
 export async function getDashboard() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/dashboard`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.data) {
+        return result.data;
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to fetch dashboard data from REST API, using fallback:", error);
+  }
+
   await delay();
   // Frontend-derived summary (mirrors what an API could return later)
   const counts = state.applications.reduce(
@@ -448,6 +491,62 @@ export async function getDashboard() {
 }
 
 export async function getAnalytics() {
+  try {
+    const apps = await getApplications();
+    if (Array.isArray(apps) && apps.length > 0) {
+      const byStage = apps.reduce((acc, a) => {
+        const stage = a.status || a.stage;
+        acc[stage] = (acc[stage] || 0) + 1;
+        return acc;
+      }, {});
+
+      const byCompany = apps.reduce((acc, a) => {
+        const key = a.company?.name || "Other";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const byIndustry = apps.reduce((acc, a) => {
+        const key = a.company?.industry || "Other";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const weeks = Array.from({ length: 8 }).map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (7 * (7 - i)));
+        return d;
+      });
+
+      const growth = weeks.map((d, idx) => {
+        const count = apps.filter(
+          (a) => new Date(a.createdAt || a.appliedDate).getTime() <= d.getTime()
+        ).length;
+        return {
+          week: `W${idx + 1}`,
+          applications: count,
+          interviews: apps.filter(
+            (a) => (a.status === "Interview" || a.stage === "Interview") &&
+                   new Date(a.updatedAt || a.createdAt).getTime() <= d.getTime()
+          ).length,
+          offers: apps.filter(
+            (a) => (a.status === "Offer" || a.stage === "Offer") &&
+                   new Date(a.updatedAt || a.createdAt).getTime() <= d.getTime()
+          ).length,
+        };
+      });
+
+      return {
+        byStage,
+        byCompany,
+        byIndustry,
+        growth,
+      };
+    }
+  } catch (err) {
+    console.warn("Analytics from applications failed, using mock:", err);
+  }
+
   await delay();
 
   const byStage = state.applications.reduce((acc, a) => {
@@ -470,7 +569,6 @@ export async function getAnalytics() {
     return acc;
   }, {});
 
-  // Simple growth series over last 8 weeks (mocked from createdAt)
   const weeks = Array.from({ length: 8 }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (7 * (7 - i)));

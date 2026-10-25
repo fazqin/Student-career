@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -9,6 +8,7 @@ const PositionRouter = require("./src/routes/positions.routes");
 const CompanyRouter = require("./src/routes/company.routes");
 const ApplicationRouter = require("./src/routes/application.routes");
 const InterviewRouter = require("./src/routes/interview.routes");
+const DashboardRouter = require("./src/routes/dashboard.routes");
 const ProfileRouter = require("./src/routes/profiles.routes");
 const AdminBotRouter = require("./src/routes/adminBot.routes");
 
@@ -30,6 +30,7 @@ app.use("/api/positions", PositionRouter);
 app.use("/api/companies", CompanyRouter);
 app.use("/api/applications", ApplicationRouter);
 app.use("/api/interview", InterviewRouter);
+app.use("/api/dashboard", DashboardRouter);
 app.use("/api/profiles", ProfileRouter);
 app.use("/api/admin/bot", AdminBotRouter);
 
