@@ -20,6 +20,10 @@ export function RecentApplications({ applications }: { applications: any[] }) {
         {(applications ?? []).slice(0, 6).map((a) => {
           const pos = getPosition(a.positionId);
           const company = pos ? getPositionCompany(pos.id) : undefined;
+          const title = a.position?.title || a.position_title || pos?.title || "Position";
+          const companyName = a.company?.name || a.company_name || company?.name || "Company";
+          const stage = a.status || a.stage || "Applied";
+
           return (
             <div
               key={a.id}
@@ -27,16 +31,22 @@ export function RecentApplications({ applications }: { applications: any[] }) {
             >
               <div className="min-w-0">
                 <div className="truncate text-xs font-semibold text-slate-800">
-                  {pos?.title ?? "Position"}
+                  {title}
                 </div>
                 <div className="mt-1 truncate text-[11px] text-slate-500">
-                  {company?.name ?? "Company"}
+                  {companyName}
                 </div>
               </div>
-              <Badge variant="stage">{a.stage}</Badge>
+              <Badge variant="stage">{stage}</Badge>
             </div>
           );
         })}
+
+        {(!applications || applications.length === 0) && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+            No recent applications found.
+          </div>
+        )}
       </div>
     </Card>
   );

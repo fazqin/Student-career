@@ -29,8 +29,8 @@ export default function Dashboard() {
       if (!alive) return;
       setProfile(p);
       setDashboard(d);
-      setApps(a);
-      setInterviews(i);
+      setApps(a || []);
+      setInterviews(i || []);
       setAnalytics(an);
     })();
     return () => {
@@ -41,36 +41,68 @@ export default function Dashboard() {
   const greeting = useMemo(() => getGreetingNameHour(), []);
 
   const counts = dashboard?.counts ?? {};
+  const totalCount = counts.total ?? apps.length;
+  const interviewCount =
+    counts.Interview ??
+    apps.filter((a) => (a.status || a.stage) === "Interview").length;
+  const offerCount =
+    counts.Offer ??
+    apps.filter((a) => (a.status || a.stage) === "Offer").length;
+  const rejectedCount =
+    counts.Rejected ??
+    apps.filter((a) => (a.status || a.stage) === "Rejected").length;
+
   const kpis = [
     {
       title: "Applications",
-      value: counts.total ?? apps.length,
+      value: totalCount,
       hint: "Active pipeline",
       icon: <Briefcase className="h-5 w-5" />,
       accent: "indigo" as const,
     },
     {
       title: "Interviews",
-      value: counts.Interview ?? apps.filter((a) => a.stage === "Interview").length,
+      value: interviewCount,
       hint: "Scheduled or ongoing",
       icon: <Calendar className="h-5 w-5" />,
       accent: "sky" as const,
     },
     {
       title: "Offers",
-      value: counts.Offer ?? apps.filter((a) => a.stage === "Offer").length,
+      value: offerCount,
       hint: "Decision time",
       icon: <CheckCircle2 className="h-5 w-5" />,
       accent: "green" as const,
     },
     {
       title: "Rejected",
-      value: counts.Rejected ?? apps.filter((a) => a.stage === "Rejected").length,
+      value: rejectedCount,
       hint: "Learn and iterate",
       icon: <XCircle className="h-5 w-5" />,
       accent: "rose" as const,
     },
   ];
+
+  const upcomingInterviewList = useMemo(() => {
+    if (interviews && interviews.length > 0) return interviews;
+    if (dashboard?.upcomingInterviews && dashboard.upcomingInterviews.length > 0) {
+      return dashboard.upcomingInterviews;
+    }
+    return apps
+      .filter((a) => (a.status || a.stage) === "Interview")
+      .map((a) => ({
+        id: `app_${a.id}`,
+        title: `${a.position?.title || a.position_title || "Position"} Interview`,
+        contact: a.company?.name || a.company_name || "Company",
+        location: "Online (Google Meet)",
+        date: a.deadline || a.updatedAt || a.updated_at || new Date().toISOString(),
+      }));
+  }, [interviews, dashboard, apps]);
+
+  const recentApplicationsList = useMemo(() => {
+    if (apps && apps.length > 0) return apps;
+    return dashboard?.recentApplications ?? [];
+  }, [apps, dashboard]);
 
   return (
     <div data-ct-light className="space-y-4">
@@ -95,10 +127,10 @@ export default function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-12">
         <div className="lg:col-span-8">
-          <ApplicationChart growth={analytics?.growth ?? []} />
+          <ApplicationChart growth={analytics?.growth ?? dashboard?.growth ?? []} />
         </div>
         <div className="lg:col-span-4">
-          <UpcomingInterviews interviews={interviews} />
+          <UpcomingInterviews interviews={upcomingInterviewList} />
         </div>
       </div>
 
@@ -107,7 +139,7 @@ export default function Dashboard() {
           <UpcomingDeadlines applications={apps} />
         </div>
         <div className="lg:col-span-6">
-          <RecentApplications applications={dashboard?.recentApplications ?? apps} />
+          <RecentApplications applications={recentApplicationsList} />
         </div>
       </div>
     </div>
