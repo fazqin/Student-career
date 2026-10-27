@@ -25,3 +25,11 @@ export function getAnalytics(): Promise<any>;
 
 export function isSavedPosition(positionId: string): Promise<boolean>;
 export function toggleSavedPosition(positionId: string): Promise<{ saved: boolean }>;
+
+export function subscribeToTier(payload: {
+  tier: "Premium" | "Ultimate" | string;
+  paymentMethod: string;
+}): Promise<any>;
+export function getCurrentSubscription(): Promise<any>;
+export function getTransactionHistory(): Promise<any>;
+

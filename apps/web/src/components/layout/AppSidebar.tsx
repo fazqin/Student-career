@@ -1,27 +1,29 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutGrid,
   Briefcase,
   Layers,
   Calendar,
-  BarChart3,
   User,
   LogOut,
+  Crown,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/utils/cn";
+import { SubscriptionModal } from "@/components/subscription/SubscriptionModal";
 
 const items = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { to: "/jobs", label: "Jobs", icon: Briefcase },
+  { to: "/jobs", label: "Positions", icon: Briefcase },
   { to: "/applications", label: "Applications", icon: Layers },
   { to: "/interviews", label: "Interviews", icon: Calendar },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/profile", label: "Profile", icon: User },
 ];
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   function handleLogout() {
     try {
@@ -64,10 +66,24 @@ export function AppSidebar() {
 
         {/* Bottom Actions: Info Card & Sign Out Button */}
         <div className="mt-auto space-y-2 pt-4 border-t border-slate-100">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
-            <div className="font-semibold text-slate-700">Demo frontend</div>
-            <div className="mt-1">Ready to connect to REST API later.</div>
+                    {/* KARTU PROMOSI TIER DENGAN TOMBOL POPUP */}
+          <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50 p-3 shadow-sm">
+            <div className="flex items-center gap-1.5 font-bold text-teal-900 text-xs">
+              <Crown className="h-4 w-4 text-amber-500 fill-amber-500" />
+              <span>Career Booster Tier</span>
+            </div>
+            <p className="mt-1 text-[11px] text-teal-700 leading-snug">
+              Dapatkan konsultasi 1-on-1 dan prioritas rekomendasi ke HR.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowSubscriptionModal(true)}
+              className="mt-2.5 w-full rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-teal-700 transition"
+            >
+              Lihat Paket Langganan
+            </button>
           </div>
+
 
           <button
             type="button"
@@ -78,6 +94,11 @@ export function AppSidebar() {
             <span>Sign Out</span>
           </button>
         </div>
+                <SubscriptionModal
+          isOpen={showSubscriptionModal}
+          onClose={() => setShowSubscriptionModal(false)}
+          currentTier="Free"
+        />
       </aside>
     </div>
   );

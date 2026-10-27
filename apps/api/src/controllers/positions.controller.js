@@ -3,9 +3,14 @@ const pool = require("../config/db");
 
 // GET semua positions
 
-const getAllPositions = async (req, res) => {
+// GET semua positions dengan Pagination
+const getAllPositions = async (req, res, next) => {
     try {
-        const query = `
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.max(1, parseInt(req.query.limit) || 6);
+        const offset = (page - 1) * limit;
+
+        const dataQuery = `
             SELECT
                 p.id,
                 p.company_id,
@@ -26,23 +31,43 @@ const getAllPositions = async (req, res) => {
             FROM positions AS p
             JOIN companies AS c
                 ON c.id = p.company_id
-            ORDER BY p.id ASC;
+            ORDER BY p.id ASC
+            LIMIT $1 OFFSET $2;
         `;
 
-        const result = await pool.query(query);
+        const countQuery = `SELECT COUNT(*) AS total FROM positions;`;
+
+        const [dataResult, countResult] = await Promise.all([
+            pool.query(dataQuery, [limit, offset]),
+            pool.query(countQuery)
+        ]);
+
+        const totalItems = parseInt(countResult.rows[0].total, 10);
+        const totalPages = Math.ceil(totalItems / limit);
 
         return res.status(200).json({
+            success: true,
             message: "Positions retrieved successfully",
-            data: result.rows,
+            data: dataResult.rows,
+            pagination: {
+                page,
+                limit,
+                totalItems,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+            }
         });
     } catch (error) {
         console.error("Error retrieving positions:", error.message);
-
         return res.status(500).json({
             message: "Internal server error",
         });
     }
 };
+
+
+
 
 const getPositionById = async (req, res) => {
     try {

@@ -242,70 +242,43 @@ export async function adminLogin(payload: AdminLoginPayload): Promise<AdminAuthR
   const email = payload.email.trim().toLowerCase();
   const password = payload.password;
 
-  // 1. First attempt real backend call if available
-  try {
-    const response = await fetch(`${API_BASE_URL}/admin/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  // 1. Tembak ke endpoint autentikasi resmi backend & Supabase
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    credentials: "include", // 👈 Wajib agar Cookie JWT diset ke browser
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
 
-    if (response.ok) {
-      const data = await response.json();
-      const authData: AdminAuthResponse = {
-        token: data.token || `admin_token_${Date.now()}`,
-        user: data.user || {
-          id: "adm_01",
-          name: "CareerTrack Administrator",
-          email,
-          role: "admin",
-        },
-      };
-      setAdminSession(authData.token, authData.user);
-      return authData;
-    } else if (response.status === 401 || response.status === 400) {
-      const errData = await response.json().catch(() => null);
-      throw new Error(errData?.message || "Invalid admin email or password.");
-    }
-  } catch (err) {
-    // If it's explicitly a 400/401 credential error from backend, bubble up
-    if (err instanceof Error && err.message.includes("Invalid")) {
-      throw err;
-    }
-    // Otherwise fallback to mock contract
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Email atau password salah.");
   }
 
-  // 2. Mock Contract fallback
-  await delay(600);
+  const user = result.data?.user;
 
-  // Valid credentials contract:
-  // Accept admin@careertrack.com / admin123, or any admin user with pass >= 6 chars
-  const isValidAdmin =
-    (email === "admin@careertrack.com" && password === "admin123") ||
-    (email === "admin@student.example" && password === "demo") ||
-    (email.includes("admin") && password.length >= 6);
-
-  if (!isValidAdmin) {
-    throw new Error(
-      "Invalid admin credentials. Use email: admin@careertrack.com and password: admin123"
-    );
+  // 2. Verifikasi keamanan: Pastikan akun tersebut memang bertipe 'admin'
+  if (user?.role !== "admin") {
+    throw new Error("Akses ditolak: Akun ini bukan administrator.");
   }
 
   const authData: AdminAuthResponse = {
-    token: `mock_admin_token_${Date.now()}`,
+    token: `admin_token_${Date.now()}`,
     user: {
-      id: "adm_01",
-      name: "CareerTrack Administrator",
-      email,
-      role: "admin",
+      id: user.id,
+      name: user.email.split("@")[0],
+      email: user.email,
+      role: user.role,
     },
   };
 
   setAdminSession(authData.token, authData.user);
   return authData;
 }
+
 
 export async function adminLogout(): Promise<void> {
   await delay(200);
@@ -695,5 +668,28 @@ export async function getAdminBotApplications(): Promise<any[]> {
     // fallback
   }
   return [];
+}
+
+export async function updateAdminApplicationStatus(
+  id: number | string,
+  data: { status?: string; priority?: string; deadline?: string | null; notes?: string | null }
+): Promise<any> {
+  const token = getAdminToken() || localStorage.getItem("token");
+
+  const res = await fetch(`${API_BASE_URL}/applications/${id}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+  if (!res.ok) {
+    throw new Error(result.message || "Gagal memperbarui lamaran");
+  }
+  return result.data;
 }
 

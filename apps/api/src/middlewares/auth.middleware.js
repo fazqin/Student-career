@@ -2,7 +2,13 @@
 const jwt = require("jsonwebtoken");
 
 function authenticateToken(req, res, next) {
-    const token = req.cookies?.access_token;
+    // Ambil token dari cookie
+    let token = req.cookies?.access_token;
+
+    // Jika tidak ada di cookie, ambil dari Header Authorization Bearer
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+        token = req.headers.authorization.split(" ")[1];
+    }
 
     if (!token) {
         return res.status(401).json({
@@ -10,6 +16,7 @@ function authenticateToken(req, res, next) {
             message: "Autentikasi diperlukan. Silakan login.",
         });
     }
+
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

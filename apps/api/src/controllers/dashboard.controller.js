@@ -1,15 +1,10 @@
 const pool = require("../config/db");
-
-/**
- * Controller to fetch aggregated dashboard data for students and admins.
- * Returns KPI counts, upcoming interviews, recent applications, and application growth.
- */
 const getDashboardData = async (req, res, next) => {
     try {
         const userId = req.user?.id;
         const role = req.user?.role;
 
-        // Query applications for the current user (or all if admin)
+        // Get semua lamaran user 
         const appsQuery = `
             SELECT
                 a.id,
@@ -44,8 +39,7 @@ const getDashboardData = async (req, res, next) => {
             Assessment: 0,
             Interview: 0,
             Offer: 0,
-            Rejected: 0,
-            Withdrawn: 0
+            Rejected: 0
         };
 
         for (const app of applications) {
@@ -56,7 +50,7 @@ const getDashboardData = async (req, res, next) => {
             }
         }
 
-        // Upcoming interviews: any application whose status is 'Interview'
+        // Interview list yang mau datang
         const upcomingInterviews = applications
             .filter((a) => a.status === "Interview")
             .map((a) => ({
@@ -73,7 +67,7 @@ const getDashboardData = async (req, res, next) => {
                 status: "Scheduled"
             }));
 
-        // Recent applications list
+        // list lamaran yang sekarang
         const recentApplications = applications.slice(0, 6).map((a) => ({
             id: String(a.id),
             userId: a.user_id,
@@ -97,7 +91,7 @@ const getDashboardData = async (req, res, next) => {
             }
         }));
 
-        // Weekly growth series over 8 weeks
+        // Perkembangan jumlah lamaran per minggu
         const weeks = Array.from({ length: 8 }).map((_, i) => {
             const d = new Date();
             d.setDate(d.getDate() - 7 * (7 - i));

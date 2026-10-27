@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Bot,
@@ -56,6 +56,9 @@ export default function ApplicationBot() {
     },
   ]);
 
+
+
+
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [botStatus, setBotStatus] = useState<BotStatus | null>(null);
@@ -63,6 +66,37 @@ export default function ApplicationBot() {
   const [showLiveDrawer, setShowLiveDrawer] = useState(false);
   const [showApiKeyHelp, setShowApiKeyHelp] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+      // State untuk menyimpan nama student yang sedang di-expand di Live Drawer
+  const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
+
+  // Grouping lamaran berdasarkan kandidat/user
+  const groupedApplicants = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        studentName: string;
+        studentEmail: string;
+        applications: typeof liveApps;
+      }
+    >();
+
+    liveApps.forEach((app) => {
+      // Gunakan email atau nama sebagai key unik kandidat
+      const key = (app.student_name || app.student_email || `user-${app.id}`).trim().toLowerCase();
+      
+      if (!map.has(key)) {
+        map.set(key, {
+          studentName: app.student_name || "Tanpa Nama",
+          studentEmail: app.student_email || "-",
+          applications: [],
+        });
+      }
+      map.get(key)!.applications.push(app);
+    });
+
+    return Array.from(map.values());
+  }, [liveApps]);
 
   // Auto scroll chat to bottom
   const scrollToBottom = () => {
@@ -463,46 +497,99 @@ export default function ApplicationBot() {
             </p>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {liveApps.length === 0 ? (
+              {groupedApplicants.length === 0 ? (
                 <div className="text-center py-10 text-xs text-slate-400">
                   Tidak ada data lamaran di database.
                 </div>
               ) : (
-                liveApps.map((app) => (
-                  <div
-                    key={app.id}
-                    className="rounded-lg border border-slate-200 bg-slate-50/50 p-2.5 text-xs hover:border-teal-300 transition"
-                  >
-                    <div className="flex items-start justify-between gap-1 mb-1">
-                      <div className="font-semibold text-slate-800 truncate">
-                        {app.student_name || app.student_email}
-                      </div>
-                      <Badge
-                        variant={
-                          app.status === "Interview"
-                            ? "info"
-                            : app.status === "Offer"
-                            ? "success"
-                            : app.status === "Rejected"
-                            ? "danger"
-                            : "default"
+                groupedApplicants.map((group) => {
+                  const isExpanded = expandedStudent === group.studentName;
+                  const totalApps = group.applications.length;
+
+                  return (
+                    <div
+                      key={group.studentName}
+                      className="rounded-lg border border-slate-200 bg-white overflow-hidden text-xs shadow-sm transition hover:border-teal-300"
+                    >
+                      {/* HEADER KANDIDAT (CLICKABLE) */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedStudent((prev) =>
+                            prev === group.studentName ? null : group.studentName
+                          )
                         }
-                        className="text-[10px] py-0.5"
+                        className="w-full flex items-center justify-between p-2.5 bg-slate-50/70 hover:bg-teal-50/50 transition text-left"
                       >
-                        {app.status}
-                      </Badge>
-                    </div>
+                        <div className="min-w-0 pr-2">
+                          <div className="font-bold text-slate-800 truncate flex items-center gap-1.5">
+                            <span className="truncate">{group.studentName}</span>
+                            <span className="text-[10px] font-normal text-slate-400 truncate">
+                              ({group.studentEmail})
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-teal-700 font-medium mt-0.5">
+                            {totalApps} posisi dilamar
+                          </div>
+                        </div>
 
-                    <div className="text-[11px] text-slate-500 truncate">
-                      {app.position_title} · {app.company_name}
-                    </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-semibold text-teal-800">
+                            {totalApps}
+                          </span>
+                          {isExpanded ? (
+                            <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                          )}
+                        </div>
+                      </button>
 
-                    <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
-                      <span>ID: #{app.id}</span>
-                      <span>Prioritas: <strong>{app.priority}</strong></span>
+                      {/* DAFTAR POSISI YANG DILAMAR (ACCORDION BODY) */}
+                      {isExpanded && (
+                        <div className="p-2 space-y-1.5 border-t border-slate-100 bg-white animate-in fade-in slide-in-from-top-1">
+                          {group.applications.map((app) => (
+                            <div
+                              key={app.id}
+                              className="rounded-md border border-slate-100 bg-slate-50/50 p-2 hover:bg-slate-50"
+                            >
+                              <div className="flex items-start justify-between gap-1 mb-1">
+                                <div className="font-semibold text-slate-800 truncate">
+                                  {app.position_title}
+                                </div>
+                                <Badge
+                                  variant={
+                                    app.status === "Interview"
+                                      ? "info"
+                                      : app.status === "Offer"
+                                      ? "success"
+                                      : app.status === "Rejected"
+                                      ? "danger"
+                                      : "default"
+                                  }
+                                  className="text-[10px] py-0 px-1.5"
+                                >
+                                  {app.status}
+                                </Badge>
+                              </div>
+
+                              <div className="text-[11px] text-slate-500 truncate">
+                                {app.company_name}
+                              </div>
+
+                              <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+                                <span>ID Lamaran: #{app.id}</span>
+                                <span>
+                                  Prioritas: <strong>{app.priority}</strong>
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

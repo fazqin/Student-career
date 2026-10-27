@@ -23,8 +23,12 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await loginUser({ email, password });
-      nav("/dashboard");
+      const data = await loginUser({ email, password });
+      if (data?.user?.role === "admin") {
+          nav("/admin/companies"); // Arahkan admin ke panel admin
+        } else {
+          nav("/dashboard");       // Mahasiswa ke portal mahasiswa
+        }
     } finally {
       setLoading(false);
     }

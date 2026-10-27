@@ -65,7 +65,7 @@ async function register(req, res, next) {
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+                expiresIn: process.env.JWT_EXPIRES_IN || "7d",
             }
         );
 
@@ -75,7 +75,7 @@ async function register(req, res, next) {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 15 * 60 * 1000,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
             path: "/",
         });
 
@@ -173,6 +173,9 @@ async function login(req, res, next) {
                     id: user.id,
                     email: user.email,
                     role: user.role,
+                    tier: user.tier || "Free",
+                    consultation_quota: user.consultation_quota || 0,
+                    tier_expires_at: user.tier_expires_at || null,
                     created_at: user.created_at,
                 },
             },
@@ -189,6 +192,9 @@ async function getMe(req, res, next) {
                 u.id,
                 u.email,
                 u.role,
+                COALESCE(u.tier, 'Free') AS tier,
+                COALESCE(u.consultation_quota, 0) AS consultation_quota,
+                u.tier_expires_at,
                 u.created_at,
                 p.full_name,
                 p.university,

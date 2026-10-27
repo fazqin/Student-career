@@ -47,7 +47,7 @@ export function LandingNavbar({ className }: { className?: string }) {
             // Penyesuaian Style:
             isTop 
               ? "max-w-7xl rounded-none border-transparent bg-transparent shadow-none px-2 sm:px-4" // Transparan di atas: Tetap menjaga grid keselarasan halaman tanpa border kotak
-              : "max-w-5xl rounded-full border-white/5 bg-[#0b3e40]/85 backdrop-blur-md shadow-2xl px-4 sm:px-6 lg:px-8" // Pas scroll: Mengempis jadi kapsul melayang yang indah
+              : "max-w-5xl rounded-full border-white/5 bg-[#0F4C75]/85 backdrop-blur-md shadow-2xl px-4 sm:px-6 lg:px-8" // Pas scroll: Mengempis jadi kapsul melayang yang indah
           )}
         >
 
@@ -80,7 +80,7 @@ export function LandingNavbar({ className }: { className?: string }) {
               <Button 
                 variant="primary" 
                 size="md" 
-                className="rounded-full px-5 py-2 !bg-[#d4a359] !text-white font-medium text-sm transition hover:brightness-110 shadow-sm"
+                className="rounded-full px-5 py-2 !bg-[#3282B8] !text-white font-medium text-sm transition hover:brightness-110 shadow-sm"
               >
                 Start Tracking
               </Button>

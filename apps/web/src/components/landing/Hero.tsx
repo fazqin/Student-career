@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight,  ShieldCheck, Timer } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/utils/cn";
 import Particles from "./Particles";
 
@@ -95,30 +94,17 @@ export function Hero({ className }: { className?: string }) {
 
               {/* 3. TOMBOL AKSI: Memastikan tombol berjejer tengah secara flex row */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center w-full">
-                <a href="#register" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full sm:w-auto">
+                <Link to="/register">
+                  <Button variant="primary" size="lg" className="w-full sm:w-auto !bg-[#BBE1FA]">
                     Start Tracking <ArrowRight className="h-4 w-4" />
                   </Button>
-                </a>
+                </Link>
                 <a href="#product" className="w-full sm:w-auto">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto !bg-[#0F4C75]">
                     Explore CareerTrack
                   </Button>
                 </a>
               </div>
-
-              {/* 4. BADGES: Mengubah ke justify-center agar badge ikut memusat di tengah */}
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <Badge variant="info">
-                  <Timer className="text-white h-3.5 w-3.5" /> <span className="text-popins text-white">Deadlines visible</span>
-                </Badge>
-                <Badge variant="success">
-                  <ShieldCheck className="text-white h-3.5 w-3.5" /><span className="text-popins text-white"> Calm & focused UI</span>
-                </Badge>
-                <Badge variant="default" className="border-teal-700 bg-[rgb(var(--hero-card))] text-white">Frontend-only demo (REST-ready)</Badge>
-              </div>
-
-              {/* 5. TIGA KARTU KECIL (STAGES, CLARITY, MOMENTUM) */}
             </div>
           </div>
         </div>

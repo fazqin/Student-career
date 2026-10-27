@@ -7,7 +7,6 @@ import Jobs from "@/pages/Jobs";
 import JobDetail from "@/pages/JobDetail";
 import Applications from "@/pages/Applications";
 import Interviews from "@/pages/Interviews";
-import Analytics from "@/pages/Analytics";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -43,7 +42,6 @@ export default function App() {
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/applications" element={<Applications />} />
           <Route path="/interviews" element={<Interviews />} />
-          <Route path="/analytics" element={<Analytics />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

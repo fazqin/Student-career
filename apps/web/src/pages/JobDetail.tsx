@@ -8,7 +8,6 @@ import {
   Building2,
   MapPin,
   Clock,
-  BadgeCheck,
 } from "lucide-react";
 
 import {
@@ -33,7 +32,10 @@ export default function JobDetail() {
   const [applicationMessage, setApplicationMessage] = useState("");
   const [applicationError, setApplicationError] = useState("");
   const [applicationPriority, setApplicationPriority] = useState("Medium");
-  const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [existingApp, setExistingApp] = useState<any>(null);
+  const isPastDeadline = Boolean(position?.deadline && new Date(position.deadline) < new Date());
+  const isActiveApplied = Boolean(existingApp && existingApp.status !== "Withdrawn");
+  const isWithdrawn = Boolean(existingApp && existingApp.status === "Withdrawn");
 
   useEffect(() => {
     let alive = true;
@@ -51,11 +53,12 @@ export default function JobDetail() {
         setSaved(s);
         const applications = await getApplications();
 
-        const applied = applications.some(
-            (a: any) => String(a.positionId) === String(id)
-          );
+        // Cari lamaran spesifik untuk posisi ini
+        const currentApp = applications.find(
+          (a: any) => String(a.positionId) === String(id)
+        );
 
-setAlreadyApplied(applied);
+        setExistingApp(currentApp);
       } catch (error) {
         console.error("Failed to load position:", error);
       }
@@ -92,14 +95,14 @@ setAlreadyApplied(applied);
   }
 
   async function onAddToApplications() {
-  if (!position || adding || alreadyApplied) return;
+  if (!position || adding || isActiveApplied || isPastDeadline) return;
 
   setAdding(true);
   setApplicationMessage("");
   setApplicationError("");
 
   try {
-    await createApplication({
+    const result = await createApplication({
       position_id: position.id,
       status: "Applied",
       priority: applicationPriority,
@@ -107,9 +110,11 @@ setAlreadyApplied(applied);
       notes: null,
     });
 
-    setAlreadyApplied(true);
-    window.alert("Position has been applied");
-    setApplicationMessage("Position has been applied");
+    setExistingApp(result?.data || { status: "Applied", positionId: position.id });
+
+    const successText = isWithdrawn ? "Lamaran berhasil diaktifkan kembali!" : "Position has been applied";
+    window.alert(successText);
+    setApplicationMessage(successText);
   } catch (error) {
     setApplicationError(
       error instanceof Error
@@ -142,6 +147,7 @@ setAlreadyApplied(applied);
   const companyIndustry = company?.industry || position.team || "General";
   const companySize = company?.size ?? company?.company_size;
   const companyWebsite = company?.website;
+  
 
   return (
     <div data-ct-light className="space-y-4">
@@ -218,17 +224,6 @@ setAlreadyApplied(applied);
                   {salaryLabel}
                 </div>
               </div>
-
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="text-xs text-slate-500">
-                  Quality signal
-                </div>
-
-                <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <BadgeCheck className="h-4 w-4 text-slate-700" />
-                  Strong fit for your focus
-                </div>
-              </div>
             </div>
           </div>
 
@@ -249,13 +244,17 @@ setAlreadyApplied(applied);
               variant="primary"
               size="lg"
               onClick={onAddToApplications}
-              disabled={adding || alreadyApplied}
+              disabled={adding || isActiveApplied || isPastDeadline}
             >
               {adding
                 ? "Adding..."
-                : alreadyApplied
-                  ? "Already Applied"
-                  : "Add to Applications"}
+                : isPastDeadline
+                  ? "Deadline Passed"
+                  : isActiveApplied
+                    ? "Already Applied"
+                    : isWithdrawn
+                      ? "Re-apply Position"
+                      : "Add to Applications"}
             </Button>
 
             {applicationMessage && (
@@ -319,19 +318,6 @@ setAlreadyApplied(applied);
                 {position.description ||
                   "No job description provided yet."}
               </p>
-
-              <ul className="mt-4 space-y-2 text-sm text-slate-600">
-                <li>
-                  • Build UI and systems with strong UX fundamentals
-                </li>
-                <li>
-                  • Collaborate with product/design, iterate fast,
-                  measure outcomes
-                </li>
-                <li>
-                  • Write clean, testable code with pragmatic tradeoffs
-                </li>
-              </ul>
             </div>
           </div>
 
@@ -350,10 +336,6 @@ setAlreadyApplied(applied);
                     {tag}
                   </span>
                 ))}
-              </div>
-
-              <div className="mt-6 text-xs text-slate-500">
-                Pro tip: Tailor your top projects to match these keywords.
               </div>
             </div>
           </div>

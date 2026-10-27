@@ -41,12 +41,11 @@ export function ProductShowcase() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="info">Weekly momentum</Badge>
                 <Badge variant="stage">Stages</Badge>
-                <Badge variant="default">Glass UI</Badge>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(20,184,166,0.12),transparent_45%),radial-gradient(circle_at_80%_40%,rgba(234,179,8,0.10),transparent_40%)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(50,130,184,0.12),transparent_45%),radial-gradient(circle_at_80%_40%,rgba(234,179,8,0.10),transparent_40%)]" />
                 <div className="grid gap-4 p-6 lg:grid-cols-12">
                   <div className="lg:col-span-4">
                     <div className="grid gap-3">
@@ -55,7 +54,7 @@ export function ProductShowcase() {
                           key={k}
                           className={cn(
                             "rounded-lg border border-slate-200 bg-slate-50 p-4",
-                            i === 2 && "shadow-sm border-teal-200 bg-teal-50"
+                            i === 2 && "shadow-sm border-sky-200 bg-sky-50"
                           )}
                         >
                           <div className="text-xs text-slate-500">{k}</div>

@@ -1,22 +1,25 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import {
   AlertCircle,
-  BriefcaseBusiness,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
-  FileText,
   Filter,
   Pencil,
   Search,
   Users,
   X,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Crown,
 } from "lucide-react";
 
 import {
   getAdminPositions,
   getAdminCompanies,
+  getAdminBotApplications,
+  updateAdminApplicationStatus,
   type Position,
   type Company,
 } from "@/services/adminApi";
@@ -50,7 +53,12 @@ interface AdminApplication {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Field tambahan untuk profil kandidat & tier
+  student_name?: string;
+  student_email?: string;
+  tier?: "Free" | "Pro" | "VIP";
 }
+
 
 interface PositionInfo {
   title: string;
@@ -286,8 +294,20 @@ export default function ApplicationManagement() {
   // Reference data
   const [positions, setPositions] = useState<Position[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loadingReferences, setLoadingReferences] = useState(true);
   const [referenceError, setReferenceError] = useState(false);
+
+    // Mode tampilan: "candidate" (Group per Mahasiswa) atau "flat" (Tabel Biasa)
+  const [viewMode, setViewMode] = useState<"candidate" | "flat">("candidate");
+  const [expandedCandidates, setExpandedCandidates] = useState<string[]>([]);
+
+  const toggleCandidateExpand = (candidateKey: string) => {
+    setExpandedCandidates((prev) =>
+      prev.includes(candidateKey)
+        ? prev.filter((k) => k !== candidateKey)
+        : [...prev, candidateKey]
+    );
+  };
+
 
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -315,12 +335,12 @@ export default function ApplicationManagement() {
     let active = true;
 
     async function loadReferences() {
-      setLoadingReferences(true);
 
-      const [positionResult, companyResult] =
+      const [positionResult, companyResult, appResult] =
         await Promise.allSettled([
           getAdminPositions(),
           getAdminCompanies(),
+          getAdminBotApplications(),
         ]);
 
       if (!active) return;
@@ -332,13 +352,14 @@ export default function ApplicationManagement() {
       if (companyResult.status === "fulfilled") {
         setCompanies(companyResult.value);
       }
-
+      if (appResult.status === "fulfilled" && appResult.value.length > 0) {
+        setApplications(appResult.value);
+      }
       setReferenceError(
         positionResult.status === "rejected" ||
           companyResult.status === "rejected"
       );
 
-      setLoadingReferences(false);
     }
 
     void loadReferences();
@@ -486,6 +507,39 @@ export default function ApplicationManagement() {
     setSelectedPriority("All");
   }
 
+    // Mengelompokkan lamaran yang sudah difilter berdasarkan kandidat/mahasiswa
+  const groupedCandidates = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        userId: string;
+        studentName: string;
+        studentEmail: string;
+        tier: "Free" | "Pro" | "VIP";
+        applications: AdminApplication[];
+      }
+    >();
+
+    filteredApplications.forEach((app) => {
+      const key = (app.student_name || app.student_email || app.user_id).toLowerCase().trim();
+      
+      if (!map.has(key)) {
+        map.set(key, {
+          userId: app.user_id,
+          studentName: app.student_name || `Kandidat (${app.user_id.slice(0, 8)})`,
+          studentEmail: app.student_email || "Email tidak terdaftar",
+          tier: (app.tier as any) || "Free", // Mengambil tier riil dari database
+          applications: [],
+        });
+      }
+
+      map.get(key)!.applications.push(app);
+    });
+
+    return Array.from(map.values());
+  }, [filteredApplications]);
+
+
   // ====================================================
   // EDIT APPLICATION
   // ====================================================
@@ -507,28 +561,41 @@ export default function ApplicationManagement() {
     setEditingApplication(null);
   }
 
-  function handleSaveEdit() {
+    async function handleSaveEdit() {
     if (!editingApplication) return;
 
-    const updatedAt = new Date().toISOString();
+    try {
+      // 🚀 1. Kirim request PATCH ke Backend & Supabase!
+      await updateAdminApplicationStatus(editingApplication.id, {
+        status: editStatus,
+        priority: editPriority,
+        deadline: editDeadline || null,
+        notes: editNotes.trim() || null,
+      });
 
-    setApplications((previous) =>
-      previous.map((application) =>
-        application.id === editingApplication.id
-          ? {
-              ...application,
-              status: editStatus,
-              priority: editPriority,
-              deadline: editDeadline || null,
-              notes: editNotes.trim() || null,
-              updated_at: updatedAt,
-            }
-          : application
-      )
-    );
+      // 2. Perbarui state di layar
+      const updatedAt = new Date().toISOString();
+      setApplications((previous) =>
+        previous.map((application) =>
+          application.id === editingApplication.id
+            ? {
+                ...application,
+                status: editStatus,
+                priority: editPriority,
+                deadline: editDeadline || null,
+                notes: editNotes.trim() || null,
+                updated_at: updatedAt,
+              }
+            : application
+        )
+      );
 
-    handleCloseEdit();
+      handleCloseEdit();
+    } catch (err: any) {
+      alert(`Gagal menyimpan: ${err.message}`);
+    }
   }
+
 
   // ====================================================
   // UI
@@ -680,6 +747,39 @@ export default function ApplicationManagement() {
           </div>
         </div>
       </div>
+              {/* VIEW MODE TOGGLE & SEARCH ROW */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          {/* TAB SWITCHER */}
+          <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode("candidate")}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                viewMode === "candidate"
+                  ? "bg-white text-teal-800 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Users className="h-3.5 w-3.5 text-teal-600" />
+              <span>Grup per Kandidat ({groupedCandidates.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode("flat")}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                viewMode === "flat"
+                  ? "bg-white text-teal-800 shadow-sm"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Layers className="h-3.5 w-3.5 text-slate-500" />
+              <span>Semua Lamaran ({filteredApplications.length})</span>
+            </button>
+          </div>
+
+          {/* Kolom Search dan Filter Status (Bawaanmu) tetap ada di sebelahnya */}
+        </div>
 
       {/* REFERENCE WARNING */}
       {referenceError && (
@@ -716,199 +816,138 @@ export default function ApplicationManagement() {
       )}
 
       {/* APPLICATION TABLE */}
-      {filteredApplications.length > 0 && (
+      {filteredApplications.length > 0 && viewMode === "candidate" && (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1080px] text-left text-sm text-slate-600">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th className="px-5 py-3.5">
-                    Student
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Position / Company
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Applied Date
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Deadline
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Priority
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Status
-                  </th>
-
-                  <th className="px-4 py-3.5">
-                    Notes
-                  </th>
-
-                  <th className="px-5 py-3.5 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {filteredApplications.map((application) => {
-                  const position = positionLookup.get(
-                    String(application.position_id)
-                  );
-
-                  return (
+          <table className="w-full min-w-[900px] text-left text-sm text-slate-600">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-5 py-3.5">Kandidat / Mahasiswa</th>
+                <th className="px-4 py-3.5">Tier Akun</th>
+                <th className="px-4 py-3.5">Total Posisi Dilamar</th>
+                <th className="px-4 py-3.5">Ringkasan Status</th>
+                <th className="px-5 py-3.5 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {groupedCandidates.map((candidate) => {
+                const isExpanded = expandedCandidates.includes(candidate.userId);
+                const total = candidate.applications.length;
+                const offers = candidate.applications.filter((a) => a.status === "Offer").length;
+                const interviews = candidate.applications.filter((a) => a.status === "Interview").length;
+                const applied = candidate.applications.filter((a) => a.status === "Applied").length;
+                return (
+                  <Fragment key={candidate.userId}>
+                    {/* BARIS UTAMA MAHASISWA */}
                     <tr
-                      key={application.id}
-                      className="transition-colors hover:bg-slate-50"
+                      onClick={() => toggleCandidateExpand(candidate.userId)}
+                      className="cursor-pointer transition-colors hover:bg-teal-50/30"
                     >
-                      {/* STUDENT */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
-                            <Users className="h-5 w-5" />
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-100 font-bold text-teal-800">
+                            {candidate.studentName.charAt(0).toUpperCase()}
                           </div>
-
-                          <div className="min-w-0">
-                            <div className="font-semibold text-slate-900">
-                              Student ID
+                          <div>
+                            <div className="font-bold text-slate-900 flex items-center gap-2">
+                              <span>{candidate.studentName}</span>
+                              {candidate.tier === "Pro" && (
+                                <span className="flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                                  <Crown className="h-3 w-3 text-amber-600" /> PRO
+                                </span>
+                              )}
                             </div>
-
-                            <div
-                              className="mt-1 text-[11px] text-slate-500"
-                              title={application.user_id}
-                            >
-                              {application.user_id.slice(0, 8)}...
-                            </div>
-
-                            <div className="mt-1 text-[10px] text-slate-400">
-                              Application #{application.id}
-                            </div>
+                            <div className="text-xs text-slate-500">{candidate.studentEmail}</div>
                           </div>
                         </div>
                       </td>
-
-                      {/* POSITION & COMPANY */}
                       <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <BriefcaseBusiness className="h-4 w-4 shrink-0 text-teal-600" />
-
-                          <div className="min-w-0">
-                            <div className="font-semibold text-slate-900">
-                              {position?.title ||
-                                `Position #${application.position_id}`}
-                            </div>
-
-                            <div className="mt-1 text-[11px] text-slate-500">
-                              {position?.company ||
-                                "Company unavailable"}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* APPLIED DATE */}
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <CalendarDays className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-
-                          {formatDate(application.applied_date)}
-                        </div>
-                      </td>
-
-                      {/* DEADLINE */}
-                      <td className="px-4 py-4 text-xs">
-                        {formatDate(application.deadline)}
-                      </td>
-
-                      {/* PRIORITY */}
-                      <td className="px-4 py-4">
-                        <Badge
-                          variant={priorityVariant(
-                            application.priority
-                          )}
-                        >
-                          {application.priority}
+                        <Badge variant={candidate.tier === "Pro" ? "warning" : "default"}>
+                          {candidate.tier} Tier
                         </Badge>
                       </td>
-
-                      {/* STATUS */}
+                      <td className="px-4 py-4 font-semibold text-slate-800">
+                        {total} Lowongan
+                      </td>
                       <td className="px-4 py-4">
-                        <Badge
-                          variant={statusVariant(
-                            application.status
-                          )}
-                        >
-                          {application.status}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1.5 text-xs">
+                          {offers > 0 && <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-800 font-semibold">{offers} Offer</span>}
+                          {interviews > 0 && <span className="rounded bg-sky-100 px-2 py-0.5 text-sky-800 font-semibold">{interviews} Interview</span>}
+                          {applied > 0 && <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-700">{applied} Applied</span>}
+                        </div>
                       </td>
-
-                      {/* NOTES */}
-                      <td className="max-w-[160px] px-4 py-4">
-                        {application.notes ? (
-                          <div
-                            className="flex items-center gap-1.5 text-xs text-slate-600"
-                            title={application.notes}
-                          >
-                            <FileText className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-
-                            <span className="truncate">
-                              {application.notes}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400">
-                            -
-                          </span>
-                        )}
-                      </td>
-
-                      {/* ACTIONS */}
                       <td className="px-5 py-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleOpenEdit(application)
-                          }
-                          title="Update Application"
-                          aria-label={`Update application ${application.id}`}
-                          className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-teal-700"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
+                        <Button variant="ghost" size="sm" className="flex items-center gap-1 ml-auto text-xs">
+                          <span>{isExpanded ? "Tutup" : "Lihat Posisi"}</span>
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* TABLE FOOTER */}
-          <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <span>
-              Showing{" "}
-              <strong className="text-slate-700">
-                {filteredApplications.length}
-              </strong>{" "}
-              of{" "}
-              <strong className="text-slate-700">
-                {applications.length}
-              </strong>{" "}
-              applications
-            </span>
-
-            <span>
-              {loadingReferences
-                ? "Loading position references..."
-                : "Application Management"}
-            </span>
-          </div>
+                    {/* SUB-TABEL: RINCIAN LAMARAN KETIKA DI-EXPAND */}
+                    {isExpanded && (
+                      <tr>
+                        <td colSpan={5} className="bg-slate-50/80 p-4 border-b border-slate-200">
+                          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+                            <table className="w-full text-xs">
+                              <thead className="bg-slate-100 text-slate-600 font-semibold border-b">
+                                <tr>
+                                  <th className="px-3 py-2 text-left">Posisi & Perusahaan</th>
+                                  <th className="px-3 py-2 text-left">Tanggal Apply</th>
+                                  <th className="px-3 py-2 text-left">Prioritas</th>
+                                  <th className="px-3 py-2 text-left">Status</th>
+                                  <th className="px-3 py-2 text-right">Edit Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {candidate.applications.map((app) => {
+                                  const pos = positionLookup.get(String(app.position_id));
+                                  return (
+                                    <tr key={app.id} className="hover:bg-slate-50">
+                                      <td className="px-3 py-2.5 font-medium text-slate-900">
+                                        {pos?.title || (app as any).position_title || `Posisi #${app.position_id}`}
+                                        <div className="text-[11px] text-slate-500 font-normal">
+                                          {pos?.company || (app as any).company_name || "Perusahaan"}
+                                        </div>
+                                      </td>
+                                      <td className="px-3 py-2.5 text-slate-500">
+                                        {formatDate(app.applied_date)}
+                                      </td>
+                                      <td className="px-3 py-2.5">
+                                        <Badge variant={priorityVariant(app.priority)} className="text-[10px]">
+                                          {app.priority}
+                                        </Badge>
+                                      </td>
+                                      <td className="px-3 py-2.5">
+                                        <Badge variant={statusVariant(app.status)} className="text-[10px]">
+                                          {app.status}
+                                        </Badge>
+                                      </td>
+                                      <td className="px-3 py-2.5 text-right">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleOpenEdit(app);
+                                          }}
+                                          className="text-teal-700 hover:text-teal-900"
+                                        >
+                                          <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                                        </Button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 

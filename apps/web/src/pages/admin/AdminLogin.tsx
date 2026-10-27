@@ -67,8 +67,8 @@ export default function AdminLogin() {
   }
 
   function handleAutoFillDemo() {
-    setEmail("admin@ct.com");
-    setPassword("admin123");
+    setEmail("faza@hbs.harvard.edu");
+    setPassword("Faza123?");
     setShowPassword(false);
     setErrors({});
     setErrorMessage(null);

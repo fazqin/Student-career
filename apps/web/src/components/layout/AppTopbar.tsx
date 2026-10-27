@@ -9,7 +9,6 @@ const titles: Record<string, { title: string; subtitle: string }> = {
   "/jobs": { title: "Jobs", subtitle: "Discover and shortlist opportunities" },
   "/applications": { title: "Applications", subtitle: "Track every pipeline stage" },
   "/interviews": { title: "Interviews", subtitle: "Upcoming sessions and prep" },
-  "/analytics": { title: "Analytics", subtitle: "Momentum and conversion rates" },
   "/profile": { title: "Profile", subtitle: "Your professional snapshot" },
 };
 

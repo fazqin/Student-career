@@ -11,6 +11,7 @@ const InterviewRouter = require("./src/routes/interview.routes");
 const DashboardRouter = require("./src/routes/dashboard.routes");
 const ProfileRouter = require("./src/routes/profiles.routes");
 const AdminBotRouter = require("./src/routes/adminBot.routes");
+const SubscriptionRouter = require("./src/routes/subscription.routes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/interview", InterviewRouter);
 app.use("/api/dashboard", DashboardRouter);
 app.use("/api/profiles", ProfileRouter);
 app.use("/api/admin/bot", AdminBotRouter);
+app.use("/api/subscriptions", SubscriptionRouter);
 
 // Error handler harus setelah semua routes
 app.use(errorHandler);

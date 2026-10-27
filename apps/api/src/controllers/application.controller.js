@@ -113,16 +113,60 @@ const createApplication = async (req, res, next) => {
             notes = null,
         } = req.body;
 
-        const checkExisting = await pool.query(
-            "SELECT id FROM applications WHERE user_id = $1 AND position_id = $2",
-            [userId, position_id]
-        );
-        if (checkExisting.rows.length > 0) {
-            return res.status(409).json({
-                success: false,
-                message: "Anda sudah pernah melamar posisi ini.",
-            });
-        }
+        const checkExisting = await pool.query(`
+        SELECT a.id, a.status, p.deadline 
+        FROM positions p
+        LEFT JOIN applications a ON a.position_id = p.id AND a.user_id = $1
+        WHERE p.id = $2`, 
+        [userId, position_id]);
+
+        if (checkExisting.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "Posisi tidak ditemukan." });
+}
+        const { id: existingAppId, status: existingStatus} = checkExisting.rows[0];
+
+        // 2. Validasi Deadline Pendaftaran
+            if (deadline && new Date(deadline) < new Date()) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Pendaftaran untuk posisi ini sudah ditutup karena telah melewati batas deadline.",
+                });
+            }
+            // 3. Jika sudah pernah melamar:
+            if (existingAppId) {
+                // KONDISI A: Status Withdrawn -> RE-ACTIVATE KEMBALI
+                if (existingStatus === "Withdrawn") {
+                    const reactivateQuery = `
+                        UPDATE applications
+                        SET 
+                            status = 'Applied',
+                            priority = $1,
+                            deadline = $2,
+                            notes = $3,
+                            applied_date = NOW(),
+                            updated_at = NOW()
+                        WHERE id = $4
+                        RETURNING *;
+                    `;
+                    const result = await pool.query(reactivateQuery, [
+                        priority,
+                        deadline,
+                        notes,
+                        existingAppId
+                    ]);
+                    return res.status(200).json({
+                        success: true,
+                        message: "Lamaran berhasil diaktifkan kembali (Re-applied).",
+                        data: result.rows[0],
+                    });
+                }
+                // KONDISI B: Status masih aktif (Applied, Assessment, Interview, dll.)
+                return res.status(409).json({
+                    success: false,
+                    message: "Anda sudah memiliki lamaran aktif untuk posisi ini.",
+                });
+            }
+
 
         const query = `
             INSERT INTO applications (

@@ -5,7 +5,7 @@ const pool = require("../config/db");
  */
 async function getApplicationsWithDetails(whereClause = "", params = []) {
     const query = `
-        SELECT
+            SELECT
             a.id,
             a.user_id,
             a.position_id,
@@ -19,7 +19,8 @@ async function getApplicationsWithDetails(whereClause = "", params = []) {
             p.title AS position_title,
             c.name AS company_name,
             COALESCE(pr.full_name, u.email) AS student_name,
-            u.email AS student_email
+            u.email AS student_email,
+            COALESCE(u.tier, 'Free') AS tier   -- <--- Tambahkan ini
         FROM applications a
         JOIN positions p ON p.id = a.position_id
         JOIN companies c ON c.id = p.company_id
@@ -33,19 +34,75 @@ async function getApplicationsWithDetails(whereClause = "", params = []) {
 }
 
 /**
+ * Smart Resolver: Mencari lamaran spesifik berdasarkan nama user dan posisi/perusahaan
+ */
+async function resolveTargetApplication(rawUserName, rawPositionTitle, targetId = null) {
+    let targetName = (rawUserName || "").trim();
+    let targetPosition = (rawPositionTitle || "").trim();
+
+    // 1. Coba cari dengan targetName langsung
+    let apps = [];
+    if (targetName) {
+        apps = await getApplicationsWithDetails(
+            "LOWER(COALESCE(pr.full_name, '')) LIKE $1 OR LOWER(u.email) LIKE $1",
+            [`%${targetName.toLowerCase()}%`]
+        );
+    // 2. Jika tidak ketemu dan ada spasi (kemungkinan nama + posisi tergabung, misal "Faza Jhonson Wantimpres")
+    if (apps.length === 0 && targetName.length > 2) {
+            const words = targetName
+                .toLowerCase()
+                .split(/\s+/)
+                .filter((w) => !["milik", "user", "pelamar", "lamaran", "mahasiswa", "atas", "nama", "id"].includes(w) && w.length >= 3);
+            for (const word of words) {
+                const matched = await getApplicationsWithDetails(
+                    "LOWER(COALESCE(pr.full_name, '')) LIKE $1",
+                    [`%${word}%`]
+                );
+                if (matched.length > 0) {
+                    apps = matched;
+                    break;
+                }
+            }
+        }
+    }
+    if (apps.length === 0) {
+        return { targetName, targetPosition, targetId, appToUpdate: null, allApps: [] };
+    }
+
+    // 3. Jika targetPosition terdeteksi, cari posisi atau perusahaan yang cocok di antara lamaran kandidat tersebut
+    let appToUpdate = apps[0];
+    if (targetPosition) {
+        const matched = apps.find(
+            (a) =>
+                a.position_title.toLowerCase().includes(targetPosition.toLowerCase()) ||
+                a.company_name.toLowerCase().includes(targetPosition.toLowerCase())
+        );
+        if (matched) {
+            appToUpdate = matched;
+        }
+    }
+    return { targetName, targetPosition, targetId, appToUpdate, allApps: apps };
+}
+
+/**
  * Status checker for AI Bot
  */
 const getBotStatus = async (req, res) => {
+    const thirdPartyKey = process.env.TOKEN_API || "";
     const openAiKey = process.env.OPENAI_API_KEY || "";
     const geminiKey = process.env.GEMINI_API_KEY || "";
 
+    const hasThirdParty = Boolean(thirdPartyKey && thirdPartyKey.trim().length > 5);
     const hasOpenAi = Boolean(openAiKey && openAiKey.trim().length > 5);
     const hasGemini = Boolean(geminiKey && geminiKey.trim().length > 5);
 
     let provider = "Smart Rule Engine (No Key)";
     let model = "heuristic-nlp";
 
-    if (hasOpenAi) {
+    if (hasThirdParty) {
+        provider = "TokenGateway AI";
+        model = process.env.AI_MODEL || "deepseek-v4.1-flash";
+    } else if (hasOpenAi) {
         provider = "OpenAI";
         model = "gpt-6-astra";
     } else if (hasGemini) {
@@ -55,7 +112,7 @@ const getBotStatus = async (req, res) => {
 
     return res.status(200).json({
         success: true,
-        hasKey: hasOpenAi || hasGemini,
+        hasKey: hasThirdParty || hasOpenAi || hasGemini,
         provider,
         model,
         connectedDb: true,
@@ -100,6 +157,49 @@ async function callOpenAiApi(apiKey, systemInstruction, userMessage) {
 
     return JSON.parse(content);
 }
+
+/**
+ * Panggil Third-Party AI Gateway (OpenAI-Compatible)
+ */
+async function callThirdPartyAi(apiKey, systemInstruction, userMessage) {
+    const baseUrl = process.env.AI_BASE_URL || "https://api.openai.com/v1";
+    const endpoint = `${baseUrl.replace(/\/+$/, "")}/chat/completions`;
+    const model = process.env.AI_MODEL || "deepseek-v4.1-flash";
+
+    const body = {
+        model: model,
+        response_format: { type: "json_object" },
+        temperature: 0.1,
+        messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: userMessage },
+        ],
+    };
+
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Third Party AI Error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+        throw new Error("Tidak ada respon konten dari AI.");
+    }
+
+    content = content.replace(/```json/gi, "").replace(/```/gi, "").trim();
+    return JSON.parse(content);
+}
+
 
 /**
  * Call Gemini 1.5 Flash using raw fetch to avoid external SDK issues
@@ -150,117 +250,78 @@ async function callGeminiApi(apiKey, systemInstruction, userMessage) {
 function parseIntentHeuristic(message) {
     const text = message.toLowerCase().trim();
 
+
+    let extractedId = null;
+    const idMatch = message.match(/(?:#|id\s*(?:lamaran)?\s*#?|lamaran\s*#?|nomor\s*#?)(\d+)/i);
+    if (idMatch) {
+        extractedId = parseInt(idMatch[1], 10);
+    }
+
     // 1. STATS / SUMMARY
-    if (
-        text.includes("berapa") ||
-        text.includes("total") ||
-        text.includes("statistik") ||
-        text.includes("summary") ||
-        text.includes("rekap")
-    ) {
+    if (text.includes("berapa") || text.includes("total") || text.includes("statistik") || text.includes("rekap") || text.includes("summary")) {
         return {
             intent: "GET_STATISTICS",
             replyTemplate: "Berikut ringkasan statistik lamaran saat ini.",
         };
     }
 
-    // 2. LIST / CARI LAMARAN
-    if (
-        text.startsWith("cari") ||
-        text.startsWith("list") ||
-        text.startsWith("tampilkan") ||
-        text.startsWith("lihat") ||
-        text.includes("siapa saja") ||
-        text.includes("semua lamaran")
-    ) {
-        let filterStatus = null;
-        if (text.includes("applied")) filterStatus = "Applied";
-        else if (text.includes("interview")) filterStatus = "Interview";
-        else if (text.includes("review")) filterStatus = "In Review";
-        else if (text.includes("offer")) filterStatus = "Offer";
-        else if (text.includes("reject") || text.includes("ditolak")) filterStatus = "Rejected";
-        else if (text.includes("withdrawn") || text.includes("batal")) filterStatus = "Withdrawn";
-
-        return {
-            intent: "LIST_APPLICATIONS",
-            filterStatus,
-            searchQuery: text.replace(/(tampilkan|cari|lihat|list|semua|lamaran|yang|berstatus|status)/g, "").trim(),
-        };
-    }
-
-    // 3. UPDATE STATUS (Misal: "ganti status lamaran Faza menjadi Interview")
-    const updateStatusMatch = text.match(
-        /(?:ubah|ganti|set|pindahkan|update)\s+(?:status\s+)?(?:lamaran\s+)?([a-zA-Z0-9_\s@.-]+?)\s+(?:menjadi|ke|jadi|to)\s+(applied|interview|in review|offer|rejected|withdrawn)/i
-    );
-
-    if (updateStatusMatch) {
-        const rawTarget = updateStatusMatch[1].replace(/(status|lamaran|user|mahasiswa)/gi, "").trim();
-        const rawStatus = updateStatusMatch[2].toLowerCase();
-
-        let mappedStatus = "Applied";
-        if (rawStatus.includes("interview")) mappedStatus = "Interview";
-        else if (rawStatus.includes("review")) mappedStatus = "In Review";
-        else if (rawStatus.includes("offer")) mappedStatus = "Offer";
-        else if (rawStatus.includes("reject")) mappedStatus = "Rejected";
-        else if (rawStatus.includes("withdrawn")) mappedStatus = "Withdrawn";
-
-        return {
-            intent: "UPDATE_STATUS",
-            userName: rawTarget,
-            newStatus: mappedStatus,
-        };
-    }
-
-    // 3b. QUICK REJECT OR ACCEPT (misal: "tolak lamaran Faza")
-    if (text.includes("tolak") || text.includes("reject")) {
-        const target = text.replace(/(tolak|reject|lamaran|user|mahasiswa|milik)/gi, "").trim();
-        return {
-            intent: "UPDATE_STATUS",
-            userName: target,
-            newStatus: "Rejected",
-        };
-    }
-
-    if (text.includes("terima") || text.includes("offer")) {
-        const target = text.replace(/(terima|offer|lamaran|user|mahasiswa|milik|kasih)/gi, "").trim();
-        return {
-            intent: "UPDATE_STATUS",
-            userName: target,
-            newStatus: "Offer",
-        };
-    }
-
-    // 4. UPDATE PRIORITY (Misal: "set prioritas lamaran Yanto jadi High")
-    if (text.includes("prioritas") || text.includes("priority")) {
-        let mappedPriority = "Medium";
-        if (text.includes("high") || text.includes("tinggi")) mappedPriority = "High";
-        else if (text.includes("low") || text.includes("rendah")) mappedPriority = "Low";
-        else if (text.includes("medium") || text.includes("sedang")) mappedPriority = "Medium";
-
-        const target = text
-            .replace(/(ubah|ganti|set|update|prioritas|priority|lamaran|user|ke|jadi|menjadi|high|low|medium|tinggi|rendah|sedang)/gi, "")
+    // 3. DETEKSI STATUS TUJUAN
+    let detectedStatus = null;
+    if (/interview/i.test(text)) detectedStatus = "Interview";
+    else if (/in\s*review|review/i.test(text)) detectedStatus = "In Review";
+    else if (/offer|terima|diterima/i.test(text)) detectedStatus = "Offer";
+    else if (/reject|tolak|ditolak/i.test(text)) detectedStatus = "Rejected";
+    else if (/applied|daftar/i.test(text)) detectedStatus = "Applied";
+    else if (/withdrawn|batal/i.test(text)) detectedStatus = "Withdrawn";
+    // 4. UPDATE STATUS (Sangat Fleksibel)
+    const isUpdateAction = /(ubah|ganti|set|update|pindahkan|jadikan|menjadi|ke|jadi)/i.test(text);
+    if (detectedStatus && (isUpdateAction || extractedId)) {
+        // Bersihkan nama dari kata-kata perintah
+        let cleanedName = text
+            .replace(/(ubah|ganti|set|update|pindahkan|status|id|lamaran|#\d+|\d+|milik|atas\s+nama|user|mahasiswa|menjadi|ke|jadi|to|interview|in\s*review|review|offer|reject|rejected|tolak|withdrawn|applied)/gi, "")
             .trim();
-
+        return {
+            intent: "UPDATE_STATUS",
+            applicationId: extractedId,
+            userName: cleanedName || null,
+            newStatus: detectedStatus,
+        };
+    }
+    // 5. UPDATE PRIORITY
+    if (/prioritas|priority/i.test(text)) {
+        let mappedPriority = "High";
+        if (/low|rendah/i.test(text)) mappedPriority = "Low";
+        else if (/medium|sedang/i.test(text)) mappedPriority = "Medium";
+        let cleanedName = text
+            .replace(/(ubah|ganti|set|update|prioritas|priority|id|lamaran|#\d+|\d+|milik|user|ke|jadi|menjadi|high|low|medium|tinggi|rendah|sedang)/gi, "")
+            .trim();
         return {
             intent: "UPDATE_PRIORITY",
-            userName: target,
+            applicationId: extractedId,
+            userName: cleanedName || null,
             newPriority: mappedPriority,
         };
     }
-
-    // 5. ADD NOTES (Misal: "tambah catatan pada lamaran Faza: kandidat bagus")
+    // 6. ADD NOTE
     if (text.includes("catatan") || text.includes("note")) {
         const parts = text.split(/[:=]/);
         const noteText = parts[1]?.trim() || "Catatan admin dari Bot";
-        const target = parts[0].replace(/(tambah|tambahkan|catatan|notes?|pada|untuk|lamaran|user)/gi, "").trim();
-
+        const cleanedName = parts[0].replace(/(tambah|tambahkan|catatan|notes?|pada|untuk|lamaran|id|#\d+|\d+|user|milik)/gi, "").trim();
         return {
             intent: "ADD_NOTE",
-            userName: target,
+            applicationId: extractedId,
+            userName: cleanedName || null,
             notes: noteText,
         };
     }
-
+    // 7. LIST / SEARCH
+    if (/(cari|list|tampilkan|lihat|siapa)/i.test(text)) {
+        return {
+            intent: "LIST_APPLICATIONS",
+            filterStatus: detectedStatus,
+            searchQuery: text.replace(/(tampilkan|cari|lihat|list|semua|lamaran|yang|berstatus|status)/gi, "").trim(),
+        };
+    }
     return {
         intent: "GENERAL_QUERY",
         message,
@@ -281,6 +342,7 @@ const handleBotMessage = async (req, res, next) => {
             });
         }
 
+        const thirdPartyKey = process.env.TOKEN_API;
         const openAiKey = process.env.OPENAI_API_KEY;
         const geminiKey = process.env.GEMINI_API_KEY;
 
@@ -301,21 +363,33 @@ Available Actions:
 
 JSON Output Schema:
 {
-  "intent": "UPDATE_STATUS" | "UPDATE_PRIORITY" | "ADD_NOTE" | "LIST_APPLICATIONS" | "GET_STATISTICS" | "GENERAL_QUERY",
-  "userName": "string or null",
-  "positionTitle": "string or null",
-  "newStatus": "Applied" | "In Review" | "Interview" | "Offer" | "Rejected" | "Withdrawn" | null,
-  "newPriority": "High" | "Medium" | "Low" | null,
-  "notes": "string or null",
-  "filterStatus": "string or null",
-  "replyMessage": "Polite Indonesian response confirming or answering"
+"intent": "UPDATE_STATUS" | "UPDATE_PRIORITY" | "ADD_NOTE" | "LIST_APPLICATIONS" | "GET_STATISTICS" | "GENERAL_QUERY",
+"applicationId": null or integer (misal dari #80 atau ID 80, isi 80),
+"userName": "string or null",
+"positionTitle": "string or null",
+"newStatus": "Applied" | "In Review" | "Interview" | "Offer" | "Rejected" | "Withdrawn" | null,
+"newPriority": "High" | "Medium" | "Low" | null,
+"notes": "string or null",
+"filterStatus": "string or null",
+"replyMessage": "Polite Indonesian response confirming or answering"
 }
 `;
 
-        if (openAiKey && openAiKey.trim().length > 5) {
+        
+
+                if (thirdPartyKey && thirdPartyKey.trim().length > 5) {
+            try {
+                aiParsed = await callThirdPartyAi(thirdPartyKey, systemPrompt, message);
+                usedEngine = `TokenGateway (${process.env.AI_MODEL || "deepseek-v4.1-flash"})`;
+            } catch (err) {
+                console.warn("Third-Party AI gagal, beralih ke heuristic:", err.message);
+                aiParsed = parseIntentHeuristic(message);
+                usedEngine = "Smart Heuristic NLP (Fallback)";
+            }
+        } else if (openAiKey && openAiKey.trim().length > 5) {
             try {
                 aiParsed = await callOpenAiApi(openAiKey, systemPrompt, message);
-                usedEngine = "OpenAI GPT-4o Mini";
+                usedEngine = "OpenAI GPT-6-astra";
             } catch (openAiError) {
                 console.warn("OpenAI API call failed, falling back to heuristic parser:", openAiError.message);
                 aiParsed = parseIntentHeuristic(message);
@@ -335,6 +409,7 @@ JSON Output Schema:
             usedEngine = "Smart Heuristic NLP (No API Key)";
         }
 
+
         // =========================================================================
         // EXECUTE INTENT AGAINST SUPABASE POSTGRES DATABASE
         // =========================================================================
@@ -342,28 +417,25 @@ JSON Output Schema:
         const intent = aiParsed.intent;
 
         // --- 1. UPDATE STATUS ---
-        if (intent === "UPDATE_STATUS") {
-            const targetName = aiParsed.userName || "";
+                if (intent === "UPDATE_STATUS") {
+            const rawName = aiParsed.userName || "";
+            const rawPosition = aiParsed.positionTitle || "";
+            const rawId = aiParsed.applicationId || null;
             const targetStatus = aiParsed.newStatus || "Interview";
 
-            // Find matching user and applications
-            const apps = await getApplicationsWithDetails(
-                "LOWER(COALESCE(pr.full_name, '')) LIKE $1 OR LOWER(u.email) LIKE $1",
-                [`%${targetName.toLowerCase()}%`]
-            );
+            // Gunakan Smart Resolver dengan rawId
+            const { targetName, targetPosition, targetId, appToUpdate } = await resolveTargetApplication(rawName, rawPosition, rawId);
 
-            if (apps.length === 0) {
+            if (!appToUpdate) {
                 return res.status(200).json({
                     success: true,
                     aiEngine: usedEngine,
-                    reply: `Saya tidak menemukan lamaran untuk user dengan nama/email "${targetName}". Pastikan nama user terdaftar di sistem.`,
+                    reply: `Saya tidak menemukan lamaran ${rawId ? `dengan ID #${rawId}` : `untuk "${rawName}"`}. Pastikan data terdaftar di sistem.`,
                     actionsTaken: [],
                     data: [],
                 });
             }
 
-            // Update the most relevant or recent application
-            const appToUpdate = apps[0];
             const oldStatus = appToUpdate.status;
 
             await pool.query(
@@ -371,13 +443,12 @@ JSON Output Schema:
                 [targetStatus, appToUpdate.id]
             );
 
-            // Fetch fresh data
             const freshList = await getApplicationsWithDetails("a.id = $1", [appToUpdate.id]);
 
             return res.status(200).json({
                 success: true,
                 aiEngine: usedEngine,
-                reply: aiParsed.replyMessage || `Berhasil mengubah status lamaran ${appToUpdate.student_name} (${appToUpdate.position_title} di ${appToUpdate.company_name}) dari "${oldStatus}" menjadi "${targetStatus}".`,
+                reply: `Berhasil mengubah status lamaran #${appToUpdate.id} (${appToUpdate.student_name} - ${appToUpdate.position_title}) dari "${oldStatus}" menjadi "${targetStatus}".`,
                 actionsTaken: [
                     {
                         type: "UPDATE_STATUS",
@@ -395,27 +466,24 @@ JSON Output Schema:
             });
         }
 
+
         // --- 2. UPDATE PRIORITY ---
         if (intent === "UPDATE_PRIORITY") {
-            const targetName = aiParsed.userName || "";
+            const rawName = aiParsed.userName || "";
+            const rawPosition = aiParsed.positionTitle || "";
             const targetPriority = aiParsed.newPriority || "High";
 
-            const apps = await getApplicationsWithDetails(
-                "LOWER(COALESCE(pr.full_name, '')) LIKE $1 OR LOWER(u.email) LIKE $1",
-                [`%${targetName.toLowerCase()}%`]
-            );
-
-            if (apps.length === 0) {
+            const { appToUpdate } = await resolveTargetApplication(rawName, rawPosition);
+            if (!appToUpdate) {
                 return res.status(200).json({
                     success: true,
                     aiEngine: usedEngine,
-                    reply: `Tidak ditemukan lamaran untuk pengguna "${targetName}".`,
+                    reply: `Tidak ditemukan lamaran untuk pengguna "${rawName}".`,
                     actionsTaken: [],
                     data: [],
                 });
             }
 
-            const appToUpdate = apps[0];
             const oldPriority = appToUpdate.priority;
 
             await pool.query(

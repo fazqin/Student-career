@@ -176,16 +176,17 @@ export async function getCompanies() {
 }
 
 
-export async function getPositions({ query = "", type = "All" } = {}) {
-  const response = await fetch(`${API_BASE_URL}/positions`);
-
+export async function getPositions({ query = "", type = "All", page = 1, limit = 6  } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  const response = await fetch(`${API_BASE_URL}/positions?${params.toString()}`);
   if (!response.ok) {
     throw new Error("Gagal mengambil data positions");
   }
-
   const result = await response.json();
-  const rows = result.data ?? result;
-
+  const rows = result.data ?? [];
   const positions = rows.map((p) => ({
     id: String(p.id),
     companyId: String(p.company_id),
@@ -207,22 +208,10 @@ export async function getPositions({ query = "", type = "All" } = {}) {
       website: p.website,
     },
   }));
-
-  const normalizedQuery = query.trim().toLowerCase();
-
-  return positions.filter((p) => {
-    const matchesQuery =
-      !normalizedQuery ||
-      p.title.toLowerCase().includes(normalizedQuery) ||
-      p.tags.join(" ").toLowerCase().includes(normalizedQuery) ||
-      p.company.name.toLowerCase().includes(normalizedQuery);
-
-    const matchesType =
-      type === "All" ||
-      p.type.toLowerCase() === type.toLowerCase();
-
-    return matchesQuery && matchesType;
-  });
+  return {
+    positions,
+    pagination: result.pagination || { page: 1, totalPages: 1, totalItems: positions.length }
+  };
 }
 
 export async function getPositionById(positionId) {
@@ -606,3 +595,69 @@ export async function toggleSavedPosition(positionId) {
   else state.savedPositionIds.add(positionId);
   return { saved: state.savedPositionIds.has(positionId) };
 }
+
+// =========================================================================
+// SUBSCRIPTION & RAW TRANSACTION API METHODS
+// =========================================================================
+
+export async function subscribeToTier({ tier, paymentMethod }) {
+  const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/subscriptions/subscribe`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+    body: JSON.stringify({ tier, paymentMethod }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Gagal memproses transaksi langganan.");
+  }
+  return data;
+}
+
+export async function getCurrentSubscription() {
+  const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/subscriptions/current`, {
+    headers,
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Gagal mengambil info langganan saat ini.");
+  }
+  return data;
+}
+
+export async function getTransactionHistory() {
+  const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/subscriptions/history`, {
+    headers,
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Gagal mengambil riwayat transaksi.");
+  }
+  return data;
+}
+
